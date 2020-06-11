@@ -43,7 +43,9 @@ class Agent:
         self.Q[state][action] += self.Q[state][action] + self.alpha * (reward + self.gamma * self._expected_value_sum(next_state) - self.Q[state][action])
 
     def _epsilon_greedy_policy(self, state):
-        return np.random.choice(self.nA)
+        actions = [np.argmax(self.Q[state]), 0, 1, 2, 3, 4, 5]
+        probabilities = [1-self.epsilon, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA]
+        return np.random.choice(actions, p=probabilities)
 
     def _expected_value_sum(self, next_state):
         sum = 0
@@ -52,7 +54,7 @@ class Agent:
         return sum
 
     def _probability_of_action_in_next_step(self, next_state, action):
-        if (self.Q[next_state][action] == max(self.Q[next_state]):
+        if (self.Q[next_state][action] == max(self.Q[next_state])):
             probability = 1 - self.epsilon + (self.epsilon / self.nA)
         else:
             probability = self.epsilon / self.nA
