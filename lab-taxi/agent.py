@@ -3,7 +3,7 @@ from collections import defaultdict
 
 class Agent:
 
-    def __init__(self, nA=6, epsilon=0.1, alpha=0.05, gamma=1):
+    def __init__(self, nA=6, epsilon=0.03, epsilon_decay_to=0.003, epsilon_decay_rate=0.00009, alpha=0.03, alpha_decay_to=0.025, alpha_decay_rate=0.00005, gamma=1.0):
         """ Initialize agent.
 
         Params
@@ -11,9 +11,13 @@ class Agent:
         - nA: number of actions available to the agent
         """
         self.nA = nA
-        self.Q = defaultdict(lambda: np.zeros(self.nA))
+        self.Q = defaultdict(lambda: np.zeros(self.nA, dtype= np.float128)) # float128 due to RuntimeWarning: overflow encountered in double_scalars in Q-Table update
         self.epsilon = epsilon
+        self.epsilon_decay_to = epsilon_decay_to
+        self.epsilon_decay_rate = epsilon_decay_rate
         self.alpha = alpha
+        self.alpha_decay_to = alpha_decay_to
+        self.alpha_decay_rate = alpha_decay_rate
         self.gamma = gamma
 
     def select_action(self, state):
@@ -42,6 +46,10 @@ class Agent:
         """
         self.Q[state][action] += self.Q[state][action] + self.alpha * (reward + self.gamma * self._expected_value_sum(next_state) - self.Q[state][action])
 
+        if (done):
+            self._decrease_epsilon();
+            self._decrease_alpha();
+
     def _epsilon_greedy_policy(self, state):
         actions = [np.argmax(self.Q[state]), 0, 1, 2, 3, 4, 5]
         probabilities = [1-self.epsilon, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA, self.epsilon/self.nA]
@@ -58,5 +66,12 @@ class Agent:
             probability = 1 - self.epsilon + (self.epsilon / self.nA)
         else:
             probability = self.epsilon / self.nA
-
         return probability
+
+    def _decrease_epsilon(self):
+        if (self.epsilon > self.epsilon_decay_to):
+            self.epsilon -= self.epsilon_decay_rate
+
+    def _decrease_alpha(self):
+        if (self.alpha > self.alpha_decay_to):
+            self.alpha -= self.alpha_decay_rate
