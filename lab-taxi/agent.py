@@ -3,7 +3,7 @@ from collections import defaultdict
 
 class Agent:
 
-    def __init__(self, nA=6, epsilon=0.03, epsilon_decay_to=0.003, epsilon_decay_rate=0.00009, alpha=0.03, alpha_decay_to=0.025, alpha_decay_rate=0.00005, gamma=1.0):
+    def __init__(self, nA=6, epsilon=0.0105, epsilon_decay_to=0.0100, epsilon_decay_rate=0.000001, alpha=0.0320, alpha_decay_to=0.0310, alpha_decay_rate=0.000025, gamma=1.0):
         """ Initialize agent.
 
         Params
@@ -14,10 +14,10 @@ class Agent:
         self.Q = defaultdict(lambda: np.zeros(self.nA, dtype= np.float128)) # float128 due to RuntimeWarning: overflow encountered in double_scalars in Q-Table update
         self.epsilon = epsilon
         self.epsilon_decay_to = epsilon_decay_to
-        self.epsilon_decay_rate = epsilon_decay_rate
+        self.epsilon_decay_rate = (epsilon-epsilon_decay_to)/20000#epsilon_decay_rate
         self.alpha = alpha
         self.alpha_decay_to = alpha_decay_to
-        self.alpha_decay_rate = alpha_decay_rate
+        self.alpha_decay_rate = (alpha-alpha_decay_to)/20000#alpha_decay_rate
         self.gamma = gamma
 
     def select_action(self, state):
@@ -47,7 +47,7 @@ class Agent:
         self.Q[state][action] += self.Q[state][action] + self.alpha * (reward + self.gamma * self._expected_value_sum(next_state) - self.Q[state][action])
 
         if (done):
-            self._decrease_epsilon();
+            self._decrease_epsilon(reward);
             self._decrease_alpha();
 
     def _epsilon_greedy_policy(self, state):
@@ -68,7 +68,7 @@ class Agent:
             probability = self.epsilon / self.nA
         return probability
 
-    def _decrease_epsilon(self):
+    def _decrease_epsilon(self, reward):
         if (self.epsilon > self.epsilon_decay_to):
             self.epsilon -= self.epsilon_decay_rate
 
