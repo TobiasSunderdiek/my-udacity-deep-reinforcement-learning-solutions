@@ -10,6 +10,9 @@ This is my solution for the project **Navigation**[1]
         - Additionally, this will install all the dependencies from the `python` folder via `pip` as described in step 3 of [5]
         - Dependencies assume python version <= 3.6
 
+## Train
+`make train` in *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p1_navigation/* starts training the agent
+
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation
 
 [2] https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation#getting-started
