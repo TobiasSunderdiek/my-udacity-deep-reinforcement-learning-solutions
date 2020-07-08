@@ -6,3 +6,6 @@ drlnd.code-workspace
 lab-taxi/labtaxienv/
 Banana.app
 navigation-venv/
+udacity_deep_reinforcement_learning/
+.vscode/
+p1_navigation/unity-environment.log
