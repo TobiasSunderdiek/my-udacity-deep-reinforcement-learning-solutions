@@ -4,3 +4,5 @@ __pycache__/
 drlnd.code-workspace
 .DS_Store
 lab-taxi/labtaxienv/
+Banana.app
+navigation-venv/
