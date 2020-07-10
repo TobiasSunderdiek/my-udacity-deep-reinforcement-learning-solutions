@@ -1,13 +1,20 @@
 import numpy as np
+import torch.optim as optimizer
+import torch.nn.functional as F
+from baselines.deepq.replay_buffer import ReplayBuffer
 
 from dqn import DQN
 
 class Agent:
 
-    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size):
+    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size):
         self.action_size = output_size
         self.local_network = DQN(input_size, hidden_1_size, hidden_2_size, output_size)
         self.target_network = DQN(input_size, hidden_1_size, hidden_2_size, output_size)
+        self.local_network.eval()
+        self.optimizer = optimizer.Adam(self.local_network.parameters())
+        self.replay_buffer = ReplayBuffer(buffer_size)
+        self.sample_batch_size = sample_batch_size
 
     def select_action(self, state, epsilon):
         # Select action with epsilon-greedy-strategie:
@@ -25,8 +32,20 @@ class Agent:
         # Last, choose action according probability
         return np.random.choice(action_pool, p=action_probs)
 
-    def learn(self, state, action, reward, next_state):
-        pass
+    def add_to_buffer(self, state, action, reward, next_state, done):
+        self.replay_buffer.add(state, action, reward, next_state, done)
+
+    def learn(self, update_target):
+        self.local_network.train()
+        self.optimizer.zero_grad()
+        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
+        #loss = F.mse_loss(input, target)
+        #loss.backward()
+        self.optimizer.step()
+        self.local_network.eval()
+        if (update_target):
+            # todo
+            pass
 
     def save_model(self):
         pass

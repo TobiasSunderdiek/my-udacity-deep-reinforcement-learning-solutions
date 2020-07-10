@@ -5,8 +5,8 @@
 ###########################################
 import numpy as np
 from unityagents import UnityEnvironment
-from agent import Agent
 from collections import deque
+from agent import Agent
 from epsilon import Epsilon
 
 env = UnityEnvironment(file_name="Banana.app")
@@ -20,10 +20,13 @@ episodes = 2
 max_timesteps_episode = 100
 epsilon_start = 0.1
 epsilon_max_decay_to = 0.01
+update_every = 4
+buffer_size = 10
+sample_batch_size = 64
 #####################
 input_size = 37
 output_size = 4
-agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size)
+agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size)
 epsilon = Epsilon(epsilon_start, epsilon_max_decay_to, max_timesteps_episode)
 scores = deque(maxlen=100)
 for episode in range(1, episodes+1):
@@ -35,7 +38,9 @@ for episode in range(1, episodes+1):
         action = agent.select_action(state, current_epsilon)
         env_info = env.step(action)[brain_name]
         next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
-        agent.learn(state, action, reward, next_state)
+        agent.add_to_buffer(state, action, reward, next_state, done)
+        update_target = timestep % update_every == 0
+        agent.learn(update_target)
         score += reward
         state = next_state
         if done:
