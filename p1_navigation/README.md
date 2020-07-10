@@ -20,8 +20,9 @@ This is my solution for the project **Navigation**[1]
     - `cd PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p1_navigation/`
     - `make install`
         - This will download only the `python` folder instead of cloning the whole repository. I copied this git command from [4], credits to the author (Ciro Santilli) for this solution.
-        - Additionally, this will install all the dependencies from the `python` folder via `pip` as described in step 3 of [5]
-        - Dependencies assume python version <= 3.6
+            - Additionally, this will install all the dependencies from the `python` folder via `pip` as described in step 3 of [5]
+            - Dependencies assume python version <= 3.6
+        - Installs dependencies from `requirements.txt`
 
 ## Train
 `make train` in *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p1_navigation/* starts training the agent
