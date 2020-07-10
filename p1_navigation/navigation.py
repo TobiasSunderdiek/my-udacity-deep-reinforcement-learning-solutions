@@ -23,10 +23,11 @@ epsilon_max_decay_to = 0.01
 update_every = 4
 buffer_size = 10
 sample_batch_size = 64
+gamma = 0.995
 #####################
 input_size = 37
 output_size = 4
-agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size)
+agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma)
 epsilon = Epsilon(epsilon_start, epsilon_max_decay_to, max_timesteps_episode)
 scores = deque(maxlen=100)
 for episode in range(1, episodes+1):
