@@ -8,7 +8,7 @@ from dqn import DQN
 
 class Agent:
 
-    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma):
+    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau):
         self.action_size = output_size
         self.local_network = DQN(input_size, hidden_1_size, hidden_2_size, output_size)
         self.target_network = DQN(input_size, hidden_1_size, hidden_2_size, output_size)
@@ -17,6 +17,7 @@ class Agent:
         self.replay_buffer = ReplayBuffer(buffer_size)
         self.sample_batch_size = sample_batch_size
         self.gamma = gamma
+        self.tau = tau
 
     def select_action(self, state, epsilon):
         # Select action with epsilon-greedy-strategie:
@@ -48,8 +49,9 @@ class Agent:
         self.optimizer.step()
         self.local_network.eval()
         if (update_target):
-            # todo
-            self.target_network.parameters(self.local_network.parameters())
+            # copied this from https://github.com/udacity/deep-reinforcement-learning/blob/master/dqn/solution/dqn_agent.py#L116
+            for target_param, local_param in zip(self.target_network.parameters(), self.local_network.parameters()):
+                target_param.data.copy_(self.tau * local_param.data + (1-self.tau) + target_param.data)
 
     def save_model(self):
         torch.save(self.local_network.state_dict(), 'model.pth')
