@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.optim as optimizer
 import torch.nn.functional as F
-from baselines.deepq.replay_buffer import ReplayBuffer
+from baselines.deepq.replay_buffer import ReplayBuffer #todo PER
 
 from dqn import DQN
 
@@ -27,7 +27,7 @@ class Agent:
         action_probs = [epsilon/self.action_size for i in action_pool]
         # Second, get action with max Q-value from DQN
         # Probability for this action is `1-epsilon`
-        max_q_value_action = np.argmax(self.local_network(state).data.cpu().numpy())
+        max_q_value_action = np.argmax(self.local_network(torch.FloatTensor(state)).data.cpu().numpy())
         max_q_value_action_prob = 1-epsilon
         action_pool = np.append(action_pool, max_q_value_action)
         action_probs = np.append(action_probs, max_q_value_action_prob)
@@ -41,18 +41,10 @@ class Agent:
         self.local_network.train()
         self.optimizer.zero_grad()
         states, actions, rewards, next_states, dones = self._sample_from_buffer()
-        print(actions)
-        print(actions.shape)
-        print("_______")
-        print(self.local_network(states))
-        print(self.local_network(states).shape)
-        print("______")
-        print(torch.gather(self.local_network(states), 0, torch.LongTensor(actions)))
-        local_q_values = self.local_network(states)[actions]
-        target_q_values = rewards + self.gamma * max(self.target_network(states)) * dones
-        # todo
-        #loss = F.mse_loss(input, target)
-        #loss.backward()
+        local_q_values = self.local_network(states).gather(1, actions)
+        target_q_values = (rewards + self.gamma * torch.max(self.target_network(next_states), 1)[0].detach() * dones).unsqueeze(1)
+        loss = F.mse_loss(local_q_values, target_q_values)
+        loss.backward()
         self.optimizer.step()
         self.local_network.eval()
         if (update_target):
@@ -60,10 +52,15 @@ class Agent:
             pass
 
     def save_model(self):
-        pass
+        torch.save(self.local_network.state_dict(), 'model.pth')
 
     def _sample_from_buffer(self):
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
+        states = torch.FloatTensor(states)
+        # found the unsqueeze for gather solution here: https://medium.com/analytics-vidhya/understanding-indexing-with-pytorch-gather-33717a84ebc4
+        actions = torch.LongTensor(actions).unsqueeze(-1)
+        rewards = torch.FloatTensor(rewards)
+        next_states = torch.FloatTensor(next_states)
         # dones: convert True/False to 0/1
-        dones = np.where(dones == True, 1, 0)
+        dones = torch.FloatTensor(np.where(dones == True, 1, 0))
         return states, actions, rewards, next_states, dones

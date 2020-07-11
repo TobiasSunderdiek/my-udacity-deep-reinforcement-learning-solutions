@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -10,7 +9,6 @@ class DQN(nn.Module):
         self.fc3 = nn.Linear(hidden_2_size, output_size)
 
     def forward(self, input):
-        input = torch.Tensor(input)
         hidden = F.leaky_relu(self.fc1(input))
         hidden = F.leaky_relu(self.fc2(hidden))
         output = F.leaky_relu(self.fc3(hidden))
