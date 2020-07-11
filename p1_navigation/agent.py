@@ -42,14 +42,14 @@ class Agent:
         self.optimizer.zero_grad()
         states, actions, rewards, next_states, dones = self._sample_from_buffer()
         local_q_values = self.local_network(states).gather(1, actions)
-        target_q_values = (rewards + self.gamma * torch.max(self.target_network(next_states), 1)[0].detach() * dones).unsqueeze(1)
+        target_q_values = (rewards + self.gamma * torch.max(self.target_network(next_states), 1)[0].detach() * (1 - dones)).unsqueeze(1)
         loss = F.mse_loss(local_q_values, target_q_values)
         loss.backward()
         self.optimizer.step()
         self.local_network.eval()
         if (update_target):
             # todo
-            pass
+            self.target_network.parameters(self.local_network.parameters())
 
     def save_model(self):
         torch.save(self.local_network.state_dict(), 'model.pth')
@@ -57,7 +57,7 @@ class Agent:
     def _sample_from_buffer(self):
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
         states = torch.FloatTensor(states)
-        # found the unsqueeze for gather solution here: https://medium.com/analytics-vidhya/understanding-indexing-with-pytorch-gather-33717a84ebc4
+        # found the unsqueeze and gather solution here: https://medium.com/analytics-vidhya/understanding-indexing-with-pytorch-gather-33717a84ebc4
         actions = torch.LongTensor(actions).unsqueeze(-1)
         rewards = torch.FloatTensor(rewards)
         next_states = torch.FloatTensor(next_states)
