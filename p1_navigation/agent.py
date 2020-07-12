@@ -8,12 +8,12 @@ from dqn import DQN
 
 class Agent:
 
-    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau):
+    def __init__(self, input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau, learning_rate):
         self.action_size = output_size
         self.local_network = DQN(input_size, hidden_1_size, hidden_2_size, output_size)
         self.target_network = DQN(input_size, hidden_1_size, hidden_2_size, output_size)
         self.local_network.eval()
-        self.optimizer = optimizer.Adam(self.local_network.parameters())
+        self.optimizer = optimizer.Adam(self.local_network.parameters(), learning_rate)
         self.replay_buffer = ReplayBuffer(buffer_size)
         self.sample_batch_size = sample_batch_size
         self.gamma = gamma
@@ -52,6 +52,7 @@ class Agent:
             # copied this from https://github.com/udacity/deep-reinforcement-learning/blob/master/dqn/solution/dqn_agent.py#L116
             for target_param, local_param in zip(self.target_network.parameters(), self.local_network.parameters()):
                 target_param.data.copy_(self.tau * local_param.data + (1-self.tau) + target_param.data)
+        return loss
 
     def save_model(self):
         torch.save(self.local_network.state_dict(), 'model.pth')

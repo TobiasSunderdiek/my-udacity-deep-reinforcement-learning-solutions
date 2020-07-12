@@ -6,6 +6,7 @@
 import numpy as np
 from unityagents import UnityEnvironment
 from collections import deque
+from torch.utils.tensorboard import SummaryWriter
 from agent import Agent
 from epsilon import Epsilon
 
@@ -16,21 +17,23 @@ brain = env.brains[brain_name]
 ###Hyperparameter####
 hidden_1_size = 37 * 2
 hidden_2_size = 37 * 2
-episodes = 2
-max_timesteps_episode = 100
+episodes = 1_800
+max_timesteps_episode = 100_000
 epsilon_start = 0.1
 epsilon_max_decay_to = 0.01
 update_every = 4
-buffer_size = 10
+buffer_size = 1_000_000
 sample_batch_size = 64
-gamma = 0.995
+gamma = 0.99
 tau = 1e-3
+learning_rate = 1e-2#5e-4
 #####################
 input_size = 37
 output_size = 4
-agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau)
+agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau, learning_rate)
 epsilon = Epsilon(epsilon_start, epsilon_max_decay_to, max_timesteps_episode)
 scores = deque(maxlen=100)
+writer = SummaryWriter()
 for episode in range(1, episodes+1):
     state = env.reset(train_mode=True)[brain_name].vector_observations[0]
     score = 0
@@ -42,7 +45,9 @@ for episode in range(1, episodes+1):
         next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
         agent.add_to_buffer(state, action, reward, next_state, done)
         update_target = timestep % update_every == 0
-        agent.learn(update_target)
+        current_loss = agent.learn(update_target)
+        writer.add_scalar("loss", current_loss)
+        writer.add_scalar("reward", reward)
         score += reward
         state = next_state
         if done:
@@ -55,5 +60,6 @@ for episode in range(1, episodes+1):
     if (len(scores) == 100 and mean_score == 13):
         print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
         agent.save_model()
-    
+
+writer.close() 
 env.close()
