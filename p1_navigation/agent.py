@@ -51,7 +51,7 @@ class Agent:
         if (update_target):
             # copied this from https://github.com/udacity/deep-reinforcement-learning/blob/master/dqn/solution/dqn_agent.py#L116
             for target_param, local_param in zip(self.target_network.parameters(), self.local_network.parameters()):
-                target_param.data.copy_(self.tau * local_param.data + (1-self.tau) + target_param.data)
+                target_param.data.copy_(self.tau * local_param.data + (1-self.tau) * target_param.data)
         return loss
 
     def save_model(self):
