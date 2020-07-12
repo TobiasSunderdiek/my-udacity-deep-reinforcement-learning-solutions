@@ -25,7 +25,9 @@ This is my solution for the project **Navigation**[1]
         - Installs dependencies from `requirements.txt`
 
 ## Train
-`make train` in *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p1_navigation/* starts training the agent
+- `cd PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p1_navigation/`
+- `make train` starts training the agent
+- `make tensorboard` shows results in tensorboard
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation
 

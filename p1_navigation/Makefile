@@ -9,3 +9,6 @@ install:
 
 train:
 	python navigation.py
+
+tensorboard:
+	tensorboard --logdir=runs/

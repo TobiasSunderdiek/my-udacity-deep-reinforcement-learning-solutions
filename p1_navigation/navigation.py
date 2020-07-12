@@ -18,7 +18,7 @@ brain = env.brains[brain_name]
 hidden_1_size = 37 * 2
 hidden_2_size = 37 * 2
 episodes = 1_800
-max_timesteps_episode = 100_000
+max_timesteps_episode = 1_000_000
 epsilon_start = 0.1
 epsilon_max_decay_to = 0.01
 update_every = 4
@@ -37,19 +37,23 @@ writer = SummaryWriter()
 for episode in range(1, episodes+1):
     state = env.reset(train_mode=True)[brain_name].vector_observations[0]
     score = 0
+    losses = []
+    rewards = []
+    timestep = 0
 
-    for timestep in range(0, max_timesteps_episode):
+    while True:
         current_epsilon = epsilon.calculate_for(timestep)
         action = agent.select_action(state, current_epsilon)
         env_info = env.step(action)[brain_name]
         next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
         agent.add_to_buffer(state, action, reward, next_state, done)
         update_target = timestep % update_every == 0
-        current_loss = agent.learn(update_target)
-        writer.add_scalar("loss", current_loss)
-        writer.add_scalar("reward", reward)
+        loss = agent.learn(update_target)
+        losses.append(loss.cpu().detach().numpy())
+        rewards.append(reward)
         score += reward
         state = next_state
+        timestep += 1
         if done:
             break
 
@@ -60,6 +64,8 @@ for episode in range(1, episodes+1):
     if (len(scores) == 100 and mean_score == 13):
         print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
         agent.save_model()
+    writer.add_scalar("loss", np.mean(losses), episode)
+    writer.add_scalar("reward", np.mean(rewards), episode)
 
 writer.close() 
 env.close()

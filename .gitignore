@@ -9,3 +9,4 @@ navigation-venv/
 udacity_deep_reinforcement_learning/
 .vscode/
 p1_navigation/unity-environment.log
+p1_navigation/runs/
