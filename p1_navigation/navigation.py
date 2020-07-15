@@ -18,20 +18,20 @@ brain = env.brains[brain_name]
 hidden_1_size = 37 * 2
 hidden_2_size = 37 * 2
 episodes = 1_800
-max_timesteps_episode = 1_000_000
 epsilon_start = 0.1
+epsilon_decay_rate = 0.995
 epsilon_max_decay_to = 0.01
 update_every = 4
 buffer_size = 1_000_000
 sample_batch_size = 64
 gamma = 0.99
 tau = 1e-3
-learning_rate = 1e-2#5e-4
+learning_rate = 5e-4
 #####################
 input_size = 37
 output_size = 4
 agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau, learning_rate)
-epsilon = Epsilon(epsilon_start, epsilon_max_decay_to, max_timesteps_episode)
+epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
 scores = deque(maxlen=100)
 writer = SummaryWriter()
 for episode in range(1, episodes+1):
