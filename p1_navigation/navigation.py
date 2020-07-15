@@ -61,9 +61,10 @@ for episode in range(1, episodes+1):
     mean_score = np.mean(scores)
     if (episode % 10 == 0):
         print(f'Episode {episode} mean score {mean_score}', end='\r')
-    if (len(scores) == 100 and mean_score == 13):
+    if (len(scores) == 100 and mean_score >= 13):
         print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
         agent.save_model()
+        break
     writer.add_scalar("loss", np.mean(losses), episode)
     writer.add_scalar("reward", np.mean(rewards), episode)
 
