@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.optim as optimizer
 import torch.nn.functional as F
-from baselines.deepq.replay_buffer import ReplayBuffer #todo PER
+from baselines.deepq.replay_buffer import ReplayBuffer
 
 from dqn import DQN
 
