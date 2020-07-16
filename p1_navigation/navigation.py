@@ -37,8 +37,6 @@ writer = SummaryWriter()
 for episode in range(1, episodes+1):
     state = env.reset(train_mode=True)[brain_name].vector_observations[0]
     score = 0
-    losses = []
-    rewards = []
     timestep = 0
 
     while True:
@@ -48,9 +46,7 @@ for episode in range(1, episodes+1):
         next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
         agent.add_to_buffer(state, action, reward, next_state, done)
         update_target = timestep % update_every == 0
-        loss = agent.learn(update_target)
-        losses.append(loss.cpu().detach().numpy())
-        rewards.append(reward)
+        agent.learn(update_target)
         score += reward
         state = next_state
         timestep += 1
