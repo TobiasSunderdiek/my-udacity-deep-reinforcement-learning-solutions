@@ -17,7 +17,6 @@ brain = env.brains[brain_name]
 ###Hyperparameter####
 hidden_1_size = 37 * 2
 hidden_2_size = 37 * 2
-episodes = 1_800
 epsilon_start = 0.1
 epsilon_decay_rate = 0.995
 epsilon_max_decay_to = 0.01
@@ -28,6 +27,7 @@ gamma = 0.99
 tau = 1e-3
 learning_rate = 5e-4
 #####################
+episodes = 1_800
 input_size = 37
 output_size = 4
 agent = Agent(input_size, hidden_1_size, hidden_2_size, output_size, buffer_size, sample_batch_size, gamma, tau, learning_rate)
@@ -65,8 +65,7 @@ for episode in range(1, episodes+1):
         print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
         agent.save_model()
         break
-    writer.add_scalar("loss", np.mean(losses), episode)
-    writer.add_scalar("reward", np.mean(rewards), episode)
+    writer.add_scalar("score", score, episode)
 
 writer.close() 
 env.close()
