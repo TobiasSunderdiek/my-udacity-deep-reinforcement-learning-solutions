@@ -11,3 +11,5 @@ udacity_deep_reinforcement_learning/
 p1_navigation/unity-environment.log
 p2_continuous-control/control-venv/
 Reacher.app
+p2_continuous-control/runs/
+p2_continuous-control/unity-environment.log
