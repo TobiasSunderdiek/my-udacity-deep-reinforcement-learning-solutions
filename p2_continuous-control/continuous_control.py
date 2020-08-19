@@ -7,6 +7,14 @@
 from unityagents import UnityEnvironment
 import numpy as np
 
-env = UnityEnvironment(file_name='Reacher.app')
-brain_name = env.brain_names[0]
-brain = env.brains[brain_name]
+class ContinuousControl:
+    def __init__(self):
+        self.env = UnityEnvironment(file_name='Reacher.app')
+        brain_name = self.env.brain_names[0]
+        self.brain = self.env.brains[brain_name]
+
+    def train(self):
+        print("train")
+
+if __name__ == '__main__':
+    ContinuousControl().train()

@@ -6,3 +6,9 @@ install:
 	pip install . &&\
 	cd ../.. &&\
 	pip install -r requirements.txt
+
+train:
+	python continuous_control.py
+
+tensorboard:
+	tensorboard --logdir=runs/
