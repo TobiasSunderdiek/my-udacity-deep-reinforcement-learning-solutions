@@ -37,6 +37,10 @@ class ContinuousControl:
                 action = self.agent.select_action(state)
                 env_info = self.env.step(action)[self.brain_name]
                 next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
+                self.agent.add_to_buffer(state, action, reward, next_state, done)
+                self.agent.learn()
+                score += reward
+                state = next_state
                 if done:
                     break
 

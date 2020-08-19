@@ -1,3 +1,4 @@
+import torch
 import torch.optim as optimizer
 from baselines.deepq.replay_buffer import ReplayBuffer
 
@@ -16,8 +17,24 @@ class Agent:
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), actor_learning_rate)
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate)
 
-    def select_action(self):
+    def select_action(self, state):
+        # select action probs with PPO
+        # argmax auf die probs
+        # damit dann dqn
         return 0.5 #todo implement
 
-    def save_model(self):
+    def learn(self):
         pass #todo implement
+
+    def add_to_buffer(self, state, action, reward, next_state, done):
+        self.replay_buffer.add(state, action, reward, next_state, done)
+
+    def save_model(self):
+        #todo save only local weights?
+        dict = {'actor_local': self.actor_local.state_dict(),
+                'actor_target': self.actor_target.state_dict(),
+                'critic_local': self.critic_local.state_dict(),
+                'critic_target': self.critic_target.state_dict(),
+                'actor_local_optimizer': self.actor_local_optimizer.state_dict(),
+                'critic_local_optimizer': self.critic_local_optimizer.state_dict()}
+        torch.save(dict, 'model.pth')
