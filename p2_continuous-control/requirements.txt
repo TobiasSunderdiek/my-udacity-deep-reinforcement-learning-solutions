@@ -1,3 +1,4 @@
 torch==1.6.0
 tensorflow==1.15.2
 tensorboard==1.14
+git+https://github.com/openai/baselines.git
