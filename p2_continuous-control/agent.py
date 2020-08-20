@@ -1,33 +1,44 @@
 import torch
 import torch.optim as optimizer
+import numpy as np
 from baselines.deepq.replay_buffer import ReplayBuffer
 
 from model import Actor, Critic
 
 class Agent:
     def __init__(self, observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate):
-        self.actor_local = Actor(observation_state_size, action_space_size)
-        self.actor_target = Actor(observation_state_size, action_space_size)
-        self.critic_local = Critic(observation_state_size, action_space_size)
-        self.critic_target = Critic(observation_state_size, action_space_size)
+        # forgot to(device), after having a look at
+        # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
+        # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
+        # I added it here and in replay buffer
+        self.device = torch.cuda() if torch.cuda.is_available() else torch.device('cpu') #todo more to(device)?
+        self.actor_local = Actor(observation_state_size, action_space_size).to(self.device)
+        self.actor_target = Actor(observation_state_size, action_space_size).to(self.device)
+        self.critic_local = Critic(observation_state_size, action_space_size).to(self.device)
+        self.critic_target = Critic(observation_state_size, action_space_size).to(self.device)
         self.sample_batch_size = sample_batch_size
         self.replay_buffer = ReplayBuffer(replay_buffer_size)
         self.gamma = gamma
         self.tau = tau
-        weight_decay = 10e-2
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), actor_learning_rate)
         # I got how to add weight decay like described in the paper
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
+        weight_decay = 10e-2
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=weight_decay)
 
     def select_action(self, state):
-        # select action probs with PPO
-        # argmax auf die probs
-        # damit dann dqn
-        return 0.5 #todo implement
+        state = torch.FloatTensor(state).to(self.device)
+        action = self.actor_local(state).data.cpu().numpy() #todo that's directly the max action?
+        return action
 
     def learn(self):
+        self.actor_local_optimizer.zero_grad()
+        self.critic_local_optimizer.zero_grad()
+        states, actions, rewards, next_states, dones = self._sample_from_buffer()
+
+        self.actor_local_optimizer.step()
+        self.critic_local_optimizer.step()
         pass #todo implement
 
     def add_to_buffer(self, state, action, reward, next_state, done):
@@ -35,10 +46,21 @@ class Agent:
 
     def save_model(self):
         #todo save only local weights?
-        dict = {'actor_local': self.actor_local.state_dict(),
-                'actor_target': self.actor_target.state_dict(),
-                'critic_local': self.critic_local.state_dict(),
-                'critic_target': self.critic_target.state_dict(),
+        dict = {'actor_local': self.actor_local.state_dict().cpu(),
+                'actor_target': self.actor_target.state_dict().cpu(),
+                'critic_local': self.critic_local.state_dict().cpu(),
+                'critic_target': self.critic_target.state_dict().cpu(),
                 'actor_local_optimizer': self.actor_local_optimizer.state_dict(),
                 'critic_local_optimizer': self.critic_local_optimizer.state_dict()}
         torch.save(dict, 'model.pth')
+
+    def _sample_from_buffer(self):
+        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
+        states = torch.FloatTensor(states).to(self.device)
+        # found the unsqueeze and gather solution here: https://medium.com/analytics-vidhya/understanding-indexing-with-pytorch-gather-33717a84ebc4
+        actions = torch.LongTensor(actions).unsqueeze(-1) #todo hier auch unsqueeze nötig?
+        rewards = torch.FloatTensor(rewards)
+        next_states = torch.FloatTensor(next_states)
+        # dones: convert True/False to 0/1
+        dones = torch.FloatTensor(np.where(dones == True, 1, 0))
+        return states, actions, rewards, next_states, dones
