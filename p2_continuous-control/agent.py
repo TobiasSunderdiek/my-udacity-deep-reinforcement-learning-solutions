@@ -14,8 +14,12 @@ class Agent:
         self.replay_buffer = ReplayBuffer(replay_buffer_size)
         self.gamma = gamma
         self.tau = tau
+        weight_decay = 10e-2
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), actor_learning_rate)
-        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate)
+        # I got how to add weight decay like described in the paper
+        # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
+        # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
+        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=weight_decay)
 
     def select_action(self, state):
         # select action probs with PPO
