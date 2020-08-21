@@ -11,6 +11,7 @@ tau= 0.001
 actor_learning_rate=10e-4
 critic_learning_rate=10e-3
 fill last layer of weights with uniform distribution /other layers are filled with pytorch defaults which is the same like in the paper
+OrnsteinUhlenbeckActionNoise with same parameters like in the paper is added to the action to enable exploration
 
 ## Setup
 - download the reacher environment from [2] section `Version 1: One(1) Agent` for your OS and unzip it in the folder *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p2_continous-control*

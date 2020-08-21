@@ -32,6 +32,7 @@ class ContinuousControl:
         for episode in range(1, self.episodes+1):
             state = self.env.reset(train_mode=True)[self.brain_name].vector_observations[0]
             score = 0
+            #todo reset Ornstein noise?
 
             while True:
                 action = self.agent.select_action(state)
