@@ -18,7 +18,8 @@ class Agent:
         self.critic_local = Critic(observation_state_size, action_space_size).to(self.device)
         self.critic_target = Critic(observation_state_size, action_space_size).to(self.device)
         self.sample_batch_size = sample_batch_size
-        self.replay_buffer = ReplayBuffer(replay_buffer_size)
+        self.replay_buffer_size = replay_buffer_size
+        self.replay_buffer = ReplayBuffer(self.replay_buffer_size)
         self.gamma = gamma
         self.tau = tau
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), actor_learning_rate)
@@ -37,13 +38,16 @@ class Agent:
         return action + self.noise()
 
     def learn(self):
-        self.actor_local_optimizer.zero_grad()
-        self.critic_local_optimizer.zero_grad()
-        states, actions, rewards, next_states, dones = self._sample_from_buffer()
+        # only learn if enough data available
+        # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
+        if(len(self.replay_buffer) >= self.replay_buffer_size):
+            self.actor_local_optimizer.zero_grad()
+            self.critic_local_optimizer.zero_grad()
+            states, actions, rewards, next_states, dones = self._sample_from_buffer()
 
-        self.actor_local_optimizer.step()
-        self.critic_local_optimizer.step()
-        #todo implement
+            self.actor_local_optimizer.step()
+            self.critic_local_optimizer.step()
+            #todo implement
 
     def add_to_buffer(self, state, action, reward, next_state, done):
         self.replay_buffer.add(state, action, reward, next_state, done)
