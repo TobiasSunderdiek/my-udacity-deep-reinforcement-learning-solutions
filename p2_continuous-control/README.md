@@ -10,24 +10,15 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 
 > -- *this is my summary of the goal and enviroment details of the project, see [7] for the original introduction from udacity*
 
-network structure like in ddpg paper https://arxiv.org/pdf/1509.02971.pdf section 7 Experiment Details
-also other details:
-batch_size = 64
-replay_buffer_size = 10e6
-gamma= 0.99
-tau= 0.001
-actor_learning_rate=10e-4
-critic_learning_rate=10e-3
-fill last layer of weights with uniform distribution /other layers are filled with pytorch defaults which is the same like in the paper
-OrnsteinUhlenbeckActionNoise with same parameters like in the paper is added to the action to enable exploration
 
-first I used replay buffer of size 10 Mio. as described in the paper, this takes a while to fill with only one agent
-therefore I decreased the buffer size to 1 Mio. like used in the udacity example in [5]
+
+
+
+
 
 todo
 # todo gradient clipping like in the project description
-# todo update network every x timestep, like in the project description
-# todo do not do pip install . in cloned repo, instead move required libs to requirements.txt
+# todo update network every x timestep, like in the project description + Report updaten für update_every parameter
 check todos
 
 ## Setup
@@ -56,6 +47,6 @@ check todos
 
 [5] https://stackoverflow.com/a/52269934/2988
 
-[6] https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal
+[6] https://github.com/udacity/deep-reinforcement-learning
 
 [7] https://github.com/udacity/deep-reinforcement-learning/blob/master/p2_continuous-control/README.md

@@ -18,12 +18,12 @@ class ContinuousControl:
         observation_state_size = 33
         action_space_size = 4
         sample_batch_size = 64
-        replay_buffer_size = 10_000#1e6 #todo testing
+        replay_buffer_size = 1e6
         gamma= 0.99
         tau= 0.001
         actor_learning_rate=10e-4
         critic_learning_rate=10e-3
-        self.episodes = 200
+        self.episodes = 400
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
