@@ -13,7 +13,7 @@ from agent import Agent
 
 class ContinuousControl:
     def __init__(self):
-        self.env = UnityEnvironment(file_name='Reacher.app')
+        self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
         self.brain_name = self.env.brain_names[0]
         observation_state_size = 33
         action_space_size = 4
