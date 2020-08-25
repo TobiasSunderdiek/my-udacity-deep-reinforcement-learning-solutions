@@ -13,6 +13,7 @@ from agent import Agent
 
 class ContinuousControl:
     def __init__(self):
+        #self.env = UnityEnvironment(file_name='Reacher.app')
         self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
         self.brain_name = self.env.brain_names[0]
         observation_state_size = 33
@@ -23,7 +24,7 @@ class ContinuousControl:
         tau= 0.001
         actor_learning_rate=10e-4
         critic_learning_rate=10e-3
-        self.episodes = 400
+        self.episodes = 2_000
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -56,8 +57,9 @@ class ContinuousControl:
                 self.agent.save_model()
                 break
             self.writer.add_scalar("score", score, episode)
+            self.writer.add_scalar("replay buffer fill level", len(self.agent.replay_buffer), episode)
 
-        self.writer.close() 
+        self.writer.close()
         self.env.close()
 
 if __name__ == '__main__':

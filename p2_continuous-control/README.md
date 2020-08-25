@@ -10,13 +10,6 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 
 > -- *this is my summary of the goal and enviroment details of the project, see [7] for the original introduction from udacity*
 
-
-
-
-
-
-
-todo
 # todo gradient clipping like in the project description
 # todo update network every x timestep, like in the project description + Report updaten für update_every parameter
 check todos
