@@ -13,13 +13,16 @@ from agent import Agent
 
 class ContinuousControl:
     def __init__(self):
-        self.env = UnityEnvironment(file_name='Reacher.app')
-        #self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
+        #self.env = UnityEnvironment(file_name='Reacher.app')
+        self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
         self.brain_name = self.env.brain_names[0]
         observation_state_size = 33
         action_space_size = 4
         sample_batch_size = 64
-        replay_buffer_size = 1e5
+        # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
+        # otherwise index error due to float
+        replay_buffer_size = int(1e5)
+
         gamma= 0.99
         tau= 0.001
         actor_learning_rate=10e-4
