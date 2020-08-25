@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optimizer
+import torch.functional as F
 import numpy as np
 from baselines.deepq.replay_buffer import ReplayBuffer
 from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
@@ -29,25 +30,49 @@ class Agent:
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=10e-2)
         self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) #todo mean correct?
 
+    # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L66
         # I added it here
         state = torch.FloatTensor(state).to(self.device)
-        action = self.actor_local(state).data.cpu().numpy() #todo that's directly the max action?
-        return action + self.noise()
+        self.actor_local.eval()
+        with torch.no_grad():
+            action = self.actor_local(state).cpu().data.numpy() # todo why is this directly the max action
+        self.actor_local.train()
+        action += self.noise()
+        return np.clip(action, -1, 1)
 
+    # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
     def learn(self):
         # only learn if enough data available
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.replay_buffer_size):
-            self.actor_local_optimizer.zero_grad()
-            self.critic_local_optimizer.zero_grad()
+            # critic
+            self.critic_local.train()
             states, actions, rewards, next_states, dones = self._sample_from_buffer()
-
-            self.actor_local_optimizer.step()
+            local_q_values = self.critic_local(states, actions)
+            next_actions = self.actor_target(next_states)
+            target_q_values = rewards + (self.gamma * self.critic_target(next_states, next_actions) * (1 - dones))
+            critic_loss = F.mse_loss(local_q_values, target_q_values)
+            self.critic_local_optimizer.zero_grad()
+            critic_loss.backward()
             self.critic_local_optimizer.step()
-            #todo implement
+            self.critic_local.eval()
+            self.soft_update(self.critic_target, self.critic_local)
+
+            # actor
+            actions_local = self.actor_local(states)
+            actor_loss = -self.critic_local(states, actions_local).mean()
+            self.actor_local_optimizer.zero_grad()
+            actor_loss.backward()
+            self.actor_local_optimizer.step()
+            self.soft_update(self.actor_target, self.actor_local)
+
+    # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
+    def soft_update(self, target_network, local_network):
+        for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
+            target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
 
     def add_to_buffer(self, state, action, reward, next_state, done):
         self.replay_buffer.add(state, action, reward, next_state, done)

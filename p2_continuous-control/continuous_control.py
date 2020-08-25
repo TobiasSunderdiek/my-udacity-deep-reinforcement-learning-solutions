@@ -49,7 +49,7 @@ class ContinuousControl:
             mean_score = np.mean(self.scores)
             if (episode % 10 == 0):
                 print(f'Episode {episode} mean score {mean_score}', end='\r')
-            if (len(self.scores) == 100 and mean_score >= 30): #todo +30 means >30 not =?
+            if (len(self.scores) == 100 and mean_score >= 30):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agent.save_model()
                 break
