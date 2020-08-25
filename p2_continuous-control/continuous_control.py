@@ -12,23 +12,22 @@ from torch.utils.tensorboard import SummaryWriter
 from agent import Agent
 
 class ContinuousControl:
-    def __init__(self):
+    def __init__(self, hyperparameter):
+        #self.env = UnityEnvironment(file_name='../../../Reacher.app')
         #self.env = UnityEnvironment(file_name='Reacher.app')
-        self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
+        #self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
+        self.env = UnityEnvironment(file_name='../../../Reacher_Linux_NoVis/Reacher.x86_64')
         self.brain_name = self.env.brain_names[0]
         observation_state_size = 33
         action_space_size = 4
-        sample_batch_size = 64
-        # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
-        # otherwise index error due to float
-        replay_buffer_size = int(1e5)
-
-        gamma= 0.99
-        tau= 0.001
-        actor_learning_rate=10e-4
-        critic_learning_rate=10e-3
-        update_every = 10
-        self.episodes = 4_000
+        gamma= hyperparameter['gamma']
+        sample_batch_size = hyperparameter['sample_batch_size']
+        replay_buffer_size = hyperparameter['replay_buffer_size']
+        tau = hyperparameter['tau']
+        actor_learning_rate = hyperparameter['actor_learning_rate']
+        critic_learning_rate = hyperparameter['critic_learning_rate']
+        update_every = hyperparameter['update_every']
+        self.episodes = 2_000#4_000 #todo
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -62,11 +61,22 @@ class ContinuousControl:
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agent.save_model()
                 break
-            self.writer.add_scalar("score", score, episode)
-            self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
+            #self.writer.add_scalar("score", score, episode)
+            #self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
 
         self.writer.close()
         self.env.close()
+        return score
 
 if __name__ == '__main__':
-    ContinuousControl().train()
+    hyperparameter = {'gamma': 0.99,
+                      'sample_batch_size': 64,
+                      # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
+                      # otherwise index error due to float
+                      'replay_buffer_size': int(1e5),
+                      'tau': 0.001,
+                      'actor_learning_rate': 10e-4,
+                      'critic_learning_rate': 10e-3,
+                      'update_every': 10
+                    }
+    ContinuousControl(hyperparameter).train()

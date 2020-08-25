@@ -12,6 +12,9 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 
 # todo gradient clipping like in the project description
 # todo update network every x timestep, like in the project description + Report updaten für update_every parameter
+# todo tuning with ray
+- tensorboadX ist added, remove tensorboard?
+- update Makefile
 check todos
 
 ## Setup
