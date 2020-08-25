@@ -27,8 +27,9 @@ class ContinuousControl:
         tau= 0.001
         actor_learning_rate=10e-4
         critic_learning_rate=10e-3
+        update_every = 10
         self.episodes = 4_000
-        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate)
+        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
@@ -36,6 +37,7 @@ class ContinuousControl:
         for episode in range(1, self.episodes+1):
             state = self.env.reset(train_mode=True)[self.brain_name].vector_observations[0]
             score = 0
+            timestep = 0
             # reset noise
             # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
             self.agent.reset_noise
@@ -45,9 +47,10 @@ class ContinuousControl:
                 env_info = self.env.step(action)[self.brain_name]
                 next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
                 self.agent.add_to_buffer(state, action, reward, next_state, done)
-                self.agent.learn()
+                self.agent.learn(timestep)
                 score += reward
                 state = next_state
+                timestep += 1
                 if done:
                     break
 

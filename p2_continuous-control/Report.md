@@ -5,8 +5,10 @@
 I have choosen a DDPG [2] to solve this environment. The DDPG consists of a total of 4 neural networks, divided into Actor (local version and target version) and Critic (local version and target version). The Actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward. This is not a stochastic output from which the action is choosen like in PPO. To enable exploration, a noise is added to every predicted action. The critic predicts the best Q-Value for a state, as in DQN, but with the speciality that the action is added to the observation input. Both of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep.
 
 #todo
-As the notes to the `Benchmark Implementation` from the udacity project, the agent is unstable and after a while of training, performance crashed. Like in the benchmark udacity project mentioned, I also add
+1) As the notes to the `Benchmark Implementation` from the udacity project, the agent is unstable and after a while of training, performance crashed. Like in the benchmark udacity project mentioned, I also add
 torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
+performance drops again
+2) As in the notes: update every x-timestep
 
 
 #### Model

@@ -8,7 +8,7 @@ from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 from model import Actor, Critic
 
 class Agent:
-    def __init__(self, observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate):
+    def __init__(self, observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
@@ -33,6 +33,7 @@ class Agent:
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=10e-2)
         self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) # todo values centered around 0 like in the paper?
+        self.update_every = update_every
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state):
@@ -48,7 +49,7 @@ class Agent:
         return np.clip(action, -1, 1)
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
-    def learn(self):
+    def learn(self, timestep):
         # only learn if enough data available
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.replay_buffer_size):
@@ -64,7 +65,7 @@ class Agent:
             torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
             self.critic_local_optimizer.step()
             self.critic_local.eval()
-            self.soft_update(self.critic_target, self.critic_local)
+            self.soft_update(self.critic_target, self.critic_local, timestep)
 
             # actor
             actions_local = self.actor_local(states)
@@ -72,12 +73,14 @@ class Agent:
             self.actor_local_optimizer.zero_grad()
             actor_loss.backward()
             self.actor_local_optimizer.step()
-            self.soft_update(self.actor_target, self.actor_local)
+            self.soft_update(self.actor_target, self.actor_local, timestep)
 
     # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
-    def soft_update(self, target_network, local_network):
-        for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
-            target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
+    def soft_update(self, target_network, local_network, timestep):
+        # as mentioned in the udacity benchmark project, update weights only every x-timesteps
+        if (timestep % self.update_every == 0):
+            for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
+                target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
 
     def add_to_buffer(self, state, action, reward, next_state, done):
         self.replay_buffer.add(state, action, reward, next_state, done)
