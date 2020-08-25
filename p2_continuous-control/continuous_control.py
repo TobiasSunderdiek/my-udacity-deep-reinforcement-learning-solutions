@@ -57,7 +57,7 @@ class ContinuousControl:
                 self.agent.save_model()
                 break
             self.writer.add_scalar("score", score, episode)
-            self.writer.add_scalar("replay buffer fill level", len(self.agent.replay_buffer), episode)
+            self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
 
         self.writer.close()
         self.env.close()
