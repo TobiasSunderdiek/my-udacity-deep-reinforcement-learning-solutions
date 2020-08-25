@@ -17,6 +17,7 @@ OrnsteinUhlenbeckActionNoise with same parameters like in the paper is added to 
 
 **buffer_size**
 Configures the maximum size of the replay buffer, older values will be discarded. I started with a size of `10e6`, like described in the DDPG paper. As this takes a while to fill with one agent, I decreased the buffer size to `1e6`, like used in the udacity example in [1].
+This also took a while, therefore I decreased to `1e5`.
 
 **sample_batch_size**
 Configures how much samples at each learning step should be pulled from the replay buffer, actual value `64` identical to the size in the DDPG paper [2].
@@ -41,7 +42,7 @@ The agent reaches a mean reward of #todo over the last 100 episodes after episod
 
 #### Ideas for Future work
 
-- First of all, maybe switch to multiple agents like described in version 2 of this project could speed-up training due to getting experience in parallel.
+- First of all, maybe switch to multiple agents like described in version 2 of this project could speed-up training due to getting experience in parallel and therefore a larger replay buffer is possible.
 
 - In the notes to the `Benchmark Implementation` from the udacity project, several other algorithms like TRPO, TNPG or D4PG are mentioned to be more stable and to achieve better performance in this project.
 

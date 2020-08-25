@@ -13,13 +13,13 @@ from agent import Agent
 
 class ContinuousControl:
     def __init__(self):
-        #self.env = UnityEnvironment(file_name='Reacher.app')
-        self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
+        self.env = UnityEnvironment(file_name='Reacher.app')
+        #self.env = UnityEnvironment(file_name='Reacher_Linux_NoVis/Reacher.x86_64')
         self.brain_name = self.env.brain_names[0]
         observation_state_size = 33
         action_space_size = 4
         sample_batch_size = 64
-        replay_buffer_size = 1e6
+        replay_buffer_size = 1e5
         gamma= 0.99
         tau= 0.001
         actor_learning_rate=10e-4
@@ -51,7 +51,7 @@ class ContinuousControl:
             self.scores.append(score)
             mean_score = np.mean(self.scores)
             if (episode % 10 == 0):
-                print(f'Episode {episode} mean score {mean_score}', end='\r')
+                print(f'Episode {episode} mean score {mean_score}')
             if (len(self.scores) == 100 and mean_score >= 30):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agent.save_model()
