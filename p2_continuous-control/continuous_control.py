@@ -15,18 +15,16 @@ class ContinuousControl:
     def __init__(self):
         self.env = UnityEnvironment(file_name='Reacher.app')
         self.brain_name = self.env.brain_names[0]
-        seed = 2
-        self.env.seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
         observation_state_size = 33
         action_space_size = 4
         sample_batch_size = 64
-        replay_buffer_size = 10e6
+        replay_buffer_size = 10_000#1e6 #todo testing
         gamma= 0.99
         tau= 0.001
         actor_learning_rate=10e-4
         critic_learning_rate=10e-3
-        self.episodes = 2
-        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, seed)
+        self.episodes = 200
+        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 

@@ -13,6 +13,14 @@ critic_learning_rate=10e-3
 fill last layer of weights with uniform distribution /other layers are filled with pytorch defaults which is the same like in the paper
 OrnsteinUhlenbeckActionNoise with same parameters like in the paper is added to the action to enable exploration
 
+first I used replay buffer of size 10 Mio. as described in the paper, this takes a while to fill with only one agent
+therefore I decreased the buffer size to 1 Mio. like used in the udacity example in [5]
+
+todo
+# todo gradient clipping like in the project description
+# todo update network every x timestep, like in the project description
+check todos
+
 ## Setup
 - download the reacher environment from [2] section `Version 1: One(1) Agent` for your OS and unzip it in the folder *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p2_continous-control*
     - set filename of this file in `continuous_control.py` in line `env = UnityEnvironment(file_name="INSERT-FILENAME")`, e.g. `env = UnityEnvironment(file_name="Reacher.app")`
@@ -36,3 +44,5 @@ OrnsteinUhlenbeckActionNoise with same parameters like in the paper is added to 
 [3] https://github.com/udacity/deep-reinforcement-learning/tree/master/python
 
 [4] https://stackoverflow.com/a/52269934/2988
+
+[5] https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal

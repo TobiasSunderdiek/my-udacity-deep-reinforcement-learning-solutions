@@ -1,6 +1,6 @@
 import torch
 import torch.optim as optimizer
-import torch.functional as F
+import torch.nn.functional as F
 import numpy as np
 from baselines.deepq.replay_buffer import ReplayBuffer
 from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
@@ -8,12 +8,15 @@ from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 from model import Actor, Critic
 
 class Agent:
-    def __init__(self, observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, seed):
+    def __init__(self, observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
         # I added it here
-        self.device = torch.cuda() if torch.cuda.is_available() else torch.device('cpu') #todo more to(device)?
+        self.device = torch.cuda() if torch.cuda.is_available() else torch.device('cpu')
+        # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
+        # I added it here
+        seed = 2
         self.actor_local = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.actor_target = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.critic_local = Critic(observation_state_size, action_space_size, seed).to(self.device)
@@ -28,7 +31,7 @@ class Agent:
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=10e-2)
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) #todo mean correct?
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) # todo values centered around 0 like in the paper?
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state):
@@ -92,12 +95,11 @@ class Agent:
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L179
         # I added it here
         states = torch.FloatTensor(states).to(self.device)
-        # found the unsqueeze and gather solution here: https://medium.com/analytics-vidhya/understanding-indexing-with-pytorch-gather-33717a84ebc4
-        actions = torch.LongTensor(actions).unsqueeze(-1) #todo unsqueeze necessary here?
-        rewards = torch.FloatTensor(rewards)
-        next_states = torch.FloatTensor(next_states)
+        actions = torch.FloatTensor(actions).to(self.device)
+        rewards = torch.FloatTensor(rewards).unsqueeze(-1).to(self.device)
+        next_states = torch.FloatTensor(next_states).to(self.device)
         # dones: convert True/False to 0/1
-        dones = torch.FloatTensor(np.where(dones == True, 1, 0))
+        dones = torch.FloatTensor(np.where(dones == True, 1, 0)).unsqueeze(-1).to(self.device)
         return states, actions, rewards, next_states, dones
 
     def reset_noise(self):
