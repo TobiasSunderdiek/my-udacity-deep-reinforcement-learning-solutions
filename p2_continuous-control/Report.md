@@ -2,16 +2,21 @@
 
 #### Learning Algorithm
 
-I have choosen a DDPG to solve this environment. #todo
+I have choosen a DDPG [2] to solve this environment. The DDPG consists of a total of 4 neural networks, divided into Actor (local version and target version) and Critic (local version and target version). The Actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward. This is not a stochastic output from which the action is choosen like in PPO. To enable exploration, a noise is added to every predicted action. The critic predicts the best Q-Value for a state, as in DQN, but with the speciality that the action is added to the observation input. Both of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep.
 
 #### Model
 
-#todo
+I use the DDPG architecture from the DDPG paper[2] section 7 `Experiment Details`.
+The Actor gets the observation space as input, which is mapped to a dimension of `400` in the first hidden layer. The second hidden layer maps from size `400` to size `300` and the last layer maps to the action size. The last layer uses `tanh` as activation function.
 
-network structure like in ddpg paper [2] section 7 Experiment Details
+The critic gets the observation space as input, which is mapped to size `400` in the first hidden layer. 
+To the second hidden layer, the actions are added in the input and then mapped to a dimension of `300`. The last layer maps from size `300` to the output dimension of `1`, 
 
-fill last layer of weights with uniform distribution /other layers are filled with pytorch defaults which is the same like in the paper
-OrnsteinUhlenbeckActionNoise with same parameters like in the paper is added to the action to enable exploration
+In both, the actor and the critic, the weights and bias of the last layer are initialized by a uniform distribution within `(-3*10e-3, 3*10e-3)`.
+
+I have choosen `leaky relu` as activation function in the hidden layers in both, the actor and the critic.
+
+This model architecture is used for the local and the target network.
 
 #### Hyperparameter
 
@@ -47,6 +52,8 @@ The agent reaches a mean reward of #todo over the last 100 episodes after episod
 - In the notes to the `Benchmark Implementation` from the udacity project, several other algorithms like TRPO, TNPG or D4PG are mentioned to be more stable and to achieve better performance in this project.
 
 - The use of a prioritized experience replay buffer, in which sampling focus lies on values with high error, could make the agent reach the goal faster. Due to the values have high error, there is a lot to learn from this values. Also sparse experiences have the chance to be sampled more often.
+
+- As a K-80 GPU has a load of ~35%, and a V-100 GPU has a load of ~12%, maybe GPU-Usage can be improved by trying to shift more operations to the GPU. On the other hand, the models are small and it looks like a K-80 is enough.
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal
 
