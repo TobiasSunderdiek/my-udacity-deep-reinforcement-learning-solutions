@@ -61,6 +61,7 @@ class Agent:
             critic_loss = F.mse_loss(local_q_values, target_q_values)
             self.critic_local_optimizer.zero_grad()
             critic_loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
             self.critic_local_optimizer.step()
             self.critic_local.eval()
             self.soft_update(self.critic_target, self.critic_local)
@@ -85,9 +86,7 @@ class Agent:
         # save only local weights
         # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
         dict = {'actor_local': self.actor_local.state_dict().cpu(),
-                'critic_local': self.critic_local.state_dict().cpu(),
-                'actor_local_optimizer': self.actor_local_optimizer.state_dict(),
-                'critic_local_optimizer': self.critic_local_optimizer.state_dict()}
+                'critic_local': self.critic_local.state_dict().cpu()}
         torch.save(dict, 'model.pth')
 
     def _sample_from_buffer(self):

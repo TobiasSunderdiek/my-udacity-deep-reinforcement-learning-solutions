@@ -27,7 +27,7 @@ class ContinuousControl:
         tau= 0.001
         actor_learning_rate=10e-4
         critic_learning_rate=10e-3
-        self.episodes = 2_000
+        self.episodes = 4_000
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
