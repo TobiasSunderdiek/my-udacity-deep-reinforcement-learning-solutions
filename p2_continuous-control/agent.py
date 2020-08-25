@@ -12,8 +12,9 @@ class Agent:
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
+        # and https://pytorch.org/docs/stable/notes/cuda.html#best-practices
         # I added it here
-        self.device = torch.cuda if torch.cuda.is_available() else torch.device('cpu')
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
         # I added it here
         seed = 2
