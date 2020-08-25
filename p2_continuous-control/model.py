@@ -3,8 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Actor(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, seed):
         super().__init__()
+        self.seed = torch.manual_seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/model.py#L26
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400, 300)
         self.fc_3 = nn.Linear(300, output_size) # todo also add action?
@@ -19,8 +20,9 @@ class Actor(nn.Module):
         return x
 
 class Critic(nn.Module):
-    def __init__(self, input_size, action_size):
+    def __init__(self, input_size, action_size, seed):
         super().__init__()
+        self.seed = torch.manual_seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/model.py#L55
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400, 300)
         self.fc_3 = nn.Linear(300+action_size, action_size) #todo action correct here?

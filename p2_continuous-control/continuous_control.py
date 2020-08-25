@@ -15,6 +15,8 @@ class ContinuousControl:
     def __init__(self):
         self.env = UnityEnvironment(file_name='Reacher.app')
         self.brain_name = self.env.brain_names[0]
+        seed = 2
+        self.env.seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
         observation_state_size = 33
         action_space_size = 4
         sample_batch_size = 64
@@ -24,7 +26,7 @@ class ContinuousControl:
         actor_learning_rate=10e-4
         critic_learning_rate=10e-3
         self.episodes = 2
-        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate)
+        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, seed)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
@@ -32,7 +34,9 @@ class ContinuousControl:
         for episode in range(1, self.episodes+1):
             state = self.env.reset(train_mode=True)[self.brain_name].vector_observations[0]
             score = 0
-            #todo reset Ornstein noise?
+            # reset noise
+            # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
+            self.agent.reset_noise
 
             while True:
                 action = self.agent.select_action(state)
