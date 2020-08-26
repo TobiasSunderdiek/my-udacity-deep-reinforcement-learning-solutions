@@ -1,11 +1,11 @@
 from ray import tune
-from ray.tune.schedulers import FIFOScheduler
 
 from continuous_control import ContinuousControl
 
 class Trainable(tune.Trainable):
     def setup(self, hyperparameter):
-        self.continuous_control = ContinuousControl(hyperparameter)
+        env_filename = self.logdir + '../../../Reacher_Linux_NoVis/Reacher.x86_64'
+        self.continuous_control = ContinuousControl(env_filename, hyperparameter)
 
     def step(self):
         score = self.continuous_control.train()
@@ -29,6 +29,5 @@ tune.run(
     local_dir='./runs',
     checkpoint_at_end = True,
     verbose=1,
-    resources_per_trial={"cpu": 0.25, "gpu": 0.25},
-    scheduler=FIFOScheduler()
+    resources_per_trial={"cpu": 0.5, "gpu": 0.5}
 )

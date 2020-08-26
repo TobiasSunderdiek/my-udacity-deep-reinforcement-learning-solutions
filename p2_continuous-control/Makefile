@@ -10,5 +10,8 @@ install:
 train:
 	python continuous_control.py
 
+tune:
+	python tune.py
+
 tensorboard:
 	tensorboard --logdir=runs/

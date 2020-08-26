@@ -12,14 +12,14 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 
 # todo gradient clipping like in the project description
 # todo update network every x timestep, like in the project description + Report updaten für update_every parameter
-# todo tuning with ray
-- tensorboadX ist added, remove tensorboard?
-- update Makefile
+# todo tuning with ray and update doku
+- tensorboadX ist added is that necessary?
+- update Makefile and doku
 check todos
 
 ## Setup
 - download the reacher environment from [3] section `Version 1: One(1) Agent` for your OS and unzip it in the folder *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p2_continous-control*
-    - set filename of this file in `continuous_control.py` in line `env = UnityEnvironment(file_name="INSERT-FILENAME")`, e.g. `env = UnityEnvironment(file_name="Reacher.app")`
+    - set filename of this file in `continuous_control.py` at bottom in line `env_filename=...`, e.g. `env_filename="Reacher.app"`
 - download the `python/` folder from [4]
     - `cd PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p2_continuous-control/`
     - `make install`
