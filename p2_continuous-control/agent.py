@@ -88,8 +88,8 @@ class Agent:
     def save_model(self):
         # save only local weights
         # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
-        dict = {'actor_local': self.actor_local.state_dict().cpu(),
-                'critic_local': self.critic_local.state_dict().cpu()}
+        dict = {'actor_local': self.actor_local.state_dict(),
+                'critic_local': self.critic_local.state_dict()}
         torch.save(dict, 'model.pth')
 
     def _sample_from_buffer(self):

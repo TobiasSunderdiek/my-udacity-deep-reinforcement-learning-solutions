@@ -8,13 +8,15 @@ from unityagents import UnityEnvironment
 import numpy as np
 from collections import deque
 from torch.utils.tensorboard import SummaryWriter
+import random
 
 from agent import Agent
 
 class ContinuousControl:
     def __init__(self, env_filename, hyperparameter):
-        self.env = UnityEnvironment(file_name=env_filename)
-        self.brain_name = self.env.brain_names[0]
+        #self.env = UnityEnvironment(file_name=env_filename, worker_id=random.randrange(200))
+        #self.brain_name = self.env.brain_names[0]
+        self.env_filename = env_filename
         observation_state_size = 33
         action_space_size = 4
         gamma= hyperparameter['gamma']
@@ -24,14 +26,16 @@ class ContinuousControl:
         actor_learning_rate = hyperparameter['actor_learning_rate']
         critic_learning_rate = hyperparameter['critic_learning_rate']
         update_every = hyperparameter['update_every']
-        self.episodes = 12#2_000#4_000 #todo
+        self.episodes = 2#2_000#4_000 #todo
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
-    def train(self):
+    def train(self, env):
+        #env = UnityEnvironment(file_name=self.env_filename, worker_id=random.randrange(200))
+        brain_name = env.brain_names[0]
         for episode in range(1, self.episodes+1):
-            state = self.env.reset(train_mode=True)[self.brain_name].vector_observations[0]
+            state = env.reset(train_mode=True)[brain_name].vector_observations[0]
             score = 0
             timestep = 0
             # reset noise
@@ -40,7 +44,7 @@ class ContinuousControl:
 
             while True:
                 action = self.agent.select_action(state)
-                env_info = self.env.step(action)[self.brain_name]
+                env_info = env.step(action)[brain_name]
                 next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
                 self.agent.add_to_buffer(state, action, reward, next_state, done)
                 self.agent.learn(timestep)
@@ -52,17 +56,17 @@ class ContinuousControl:
 
             self.scores.append(score)
             mean_score = np.mean(self.scores)
-            if (episode % 10 == 0):
+            if (episode % 1 == 0):
                 print(f'Episode {episode} mean score {mean_score}')
-            if (len(self.scores) == 100 and mean_score >= 30):
+            if (len(self.scores) >= 1 and mean_score >= 0):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agent.save_model()
                 break
-            self.writer.add_scalar("score", score, episode)
-            self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
+            #self.writer.add_scalar("score", score, episode)
+            #self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
 
-        self.writer.close()
-        self.env.close()
+        #self.writer.close()
+        #env.close()
         return score
 
 if __name__ == '__main__':

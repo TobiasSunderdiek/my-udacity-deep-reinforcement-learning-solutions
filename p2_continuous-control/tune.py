@@ -1,14 +1,18 @@
 from ray import tune
+import random
+from unityagents import UnityEnvironment
 
 from continuous_control import ContinuousControl
 
 class Trainable(tune.Trainable):
     def setup(self, hyperparameter):
-        env_filename = self.logdir + '../../../Reacher_Linux_NoVis/Reacher.x86_64'
-        self.continuous_control = ContinuousControl(env_filename, hyperparameter)
+        self.env_filename = self.logdir + '../../../Reacher_Linux_NoVis/Reacher.x86_64'
+        self.continuous_control = ContinuousControl(self.env_filename, hyperparameter)
 
     def step(self):
-        score = self.continuous_control.train()
+        env = UnityEnvironment(file_name=self.env_filename, worker_id=random.randrange(200))
+        score = self.continuous_control.train(env)
+        env.close()
         return {'score': score}
 
 hyperparameter = {'gamma': 0.99,
@@ -27,7 +31,6 @@ tune.run(
     config=hyperparameter,
     num_samples=1,
     local_dir='./runs',
-    checkpoint_at_end = True,
     verbose=1,
-    resources_per_trial={"cpu": 0.5, "gpu": 0.5}
+    resources_per_trial={"cpu": 8, "gpu": 1}
 )

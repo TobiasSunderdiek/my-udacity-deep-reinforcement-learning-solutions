@@ -15,6 +15,7 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 # todo tuning with ray and update doku
 - tensorboadX ist added is that necessary?
 - update Makefile and doku
+- works but 'OSError: handle is closed' exception
 check todos
 
 ## Setup
