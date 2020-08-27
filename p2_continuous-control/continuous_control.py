@@ -26,7 +26,8 @@ class ContinuousControl:
         actor_learning_rate = hyperparameter['actor_learning_rate']
         critic_learning_rate = hyperparameter['critic_learning_rate']
         update_every = hyperparameter['update_every']
-        self.episodes = 2_000#4_000 #todo
+        self.episodes = 100#4_000 #todo
+        # hier läuft eine an pendulum hparams angepasst suche, inkl. abbruch von null-werten
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -56,11 +57,14 @@ class ContinuousControl:
 
             self.scores.append(score)
             mean_score = np.mean(self.scores)
-            if (episode % 100 == 0):
+            if (episode % 10 == 0):
                 print(f'Episode {episode} mean score {mean_score}')
             if (len(self.scores) >= 100 and mean_score >= 30):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agent.save_model()
+                break
+            if (len(self.scores) >= 100 and mean_score < 0):
+                print("Score too small, leave")
                 break
             self.writer.add_scalar("score", score, episode)
             self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
