@@ -20,10 +20,10 @@ hyperparameter = {'gamma': 0.99,
                 # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
                 # otherwise index error due to float
                 'replay_buffer_size': tune.grid_search([int(1e6)]),
-                'tau': tune.grid_search([0.0001, 0.001, 0.01]),
-                'actor_learning_rate': tune.grid_search([1e-4, 1e-3]),
-                'critic_learning_rate': tune.grid_search([1e-3, 3e-4]),
-                'update_every': tune.grid_search([10, 20])
+                'tau': tune.grid_search([0.01]),
+                'actor_learning_rate': tune.grid_search([10e-4, 10e-3]),
+                'critic_learning_rate': tune.grid_search([10e-3, 10e-2]),
+                'update_every': tune.grid_search([5, 10])
             }
 
 tune.run(

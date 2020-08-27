@@ -31,7 +31,7 @@ class ContinuousControl:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 100#4_000 #todo
+        self.episodes = 500#4_000 #todo
         # hier läuft eine an pendulum hparams angepasst suche, inkl. abbruch von null-werten
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)
@@ -81,14 +81,20 @@ class ContinuousControl:
 
 if __name__ == '__main__':
     hyperparameter = {'gamma': 0.99,
-                      'sample_batch_size': 64,
+                      'sample_batch_size': 128,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
                       # otherwise index error due to float
-                      'replay_buffer_size': int(1e5),
-                      'tau': 0.001,
-                      'actor_learning_rate': 10e-4,
-                      'critic_learning_rate': 10e-3,
+                      'replay_buffer_size': int(1e6),
+                      'tau': 0.01,
+                      'actor_learning_rate': 0.0001,
+                      'critic_learning_rate': 0.0003,
                       'update_every': 10
+                      #hier läuft ein long run mit vielversprechenden werten ohne tune
+                      # aber im vergleich mit noise*epsilon, man könnte auch ohne noise versuchen
+                      # 0.1 er tau war auch gut
+                      # seems large tau is better   
+                      # seems lesser updates of weights are better -> 20
                     }
-    env_filename = 'Reacher.app'
-    ContinuousControl(env_filename, hyperparameter).train()
+    env_filename = 'Reacher_Linux_NoVis/Reacher.x86_64'
+    env = UnityEnvironment(file_name=env_filename)
+    ContinuousControl(env_filename, hyperparameter).train(env)
