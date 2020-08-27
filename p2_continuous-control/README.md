@@ -17,6 +17,9 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 - update Makefile and doku
 - works but 'OSError: handle is closed' exception
 check todos
+# todo add epsilon to noise readme + hyperparameter + source is community
+# + community large buffer is better
+# + community lower episodes is sufficient
 
 ## Setup
 - download the reacher environment from [3] section `Version 1: One(1) Agent` for your OS and unzip it in the folder *PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p2_continous-control*

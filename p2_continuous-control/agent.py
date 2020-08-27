@@ -36,7 +36,7 @@ class Agent:
         self.update_every = update_every
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
-    def select_action(self, state):
+    def select_action(self, state, epsilon):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L66
         # I added it here
@@ -45,7 +45,7 @@ class Agent:
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy() # todo why is this directly the max action
         self.actor_local.train()
-        action += self.noise()
+        action += self.noise() * epsilon
         return np.clip(action, -1, 1)
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
