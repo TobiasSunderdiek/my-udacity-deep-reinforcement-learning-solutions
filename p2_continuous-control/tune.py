@@ -32,5 +32,5 @@ tune.run(
     num_samples=1,
     local_dir='./runs',
     verbose=1,
-    resources_per_trial={"cpu": 8, "gpu": 1}
+    resources_per_trial={"cpu": 4, "gpu": 1}
 )

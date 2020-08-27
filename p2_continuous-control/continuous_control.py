@@ -27,6 +27,10 @@ class ContinuousControl:
         actor_learning_rate = hyperparameter['actor_learning_rate']
         critic_learning_rate = hyperparameter['critic_learning_rate']
         update_every = hyperparameter['update_every']
+        epsilon_start = 0.1
+        epsilon_decay_rate = 0.995
+        epsilon_max_decay_to = 0.01
+        self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
         self.episodes = 100#4_000 #todo
         # hier läuft eine an pendulum hparams angepasst suche, inkl. abbruch von null-werten
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
@@ -45,7 +49,7 @@ class ContinuousControl:
             self.agent.reset_noise
 
             while True:
-                current_epsilon = epsilon.calculate_for(timestep)
+                current_epsilon = self.epsilon.calculate_for(timestep)
                 action = self.agent.select_action(state, current_epsilon)
                 env_info = env.step(action)[brain_name]
                 next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
