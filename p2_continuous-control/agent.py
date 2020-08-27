@@ -52,7 +52,7 @@ class Agent:
     def learn(self, timestep):
         # only learn if enough data available
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
-        if(len(self.replay_buffer) >= self.replay_buffer_size):
+        if(len(self.replay_buffer) >= self.sample_batch_size):
             # critic
             self.critic_local.train()
             states, actions, rewards, next_states, dones = self._sample_from_buffer()
