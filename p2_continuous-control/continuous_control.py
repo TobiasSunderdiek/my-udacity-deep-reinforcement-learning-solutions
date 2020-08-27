@@ -8,16 +8,12 @@ from unityagents import UnityEnvironment
 import numpy as np
 from collections import deque
 from torch.utils.tensorboard import SummaryWriter
-import random
 
 from agent import Agent
 from epsilon import Epsilon
 
 class ContinuousControl:
-    def __init__(self, env_filename, hyperparameter):
-        #self.env = UnityEnvironment(file_name=env_filename, worker_id=random.randrange(200))
-        #self.brain_name = self.env.brain_names[0]
-        self.env_filename = env_filename
+    def __init__(self, hyperparameter):
         observation_state_size = 33
         action_space_size = 4
         gamma= hyperparameter['gamma']
@@ -31,14 +27,12 @@ class ContinuousControl:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 500#4_000 #todo
-        # hier läuft eine an pendulum hparams angepasst suche, inkl. abbruch von null-werten
+        self.episodes = 500
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
     def train(self, env):
-        #env = UnityEnvironment(file_name=self.env_filename, worker_id=random.randrange(200))
         brain_name = env.brain_names[0]
         for episode in range(1, self.episodes+1):
             state = env.reset(train_mode=True)[brain_name].vector_observations[0]
@@ -65,18 +59,15 @@ class ContinuousControl:
             mean_score = np.mean(self.scores)
             if (episode % 10 == 0):
                 print(f'Episode {episode} mean score {mean_score}')
-            if (len(self.scores) >= 100 and mean_score >= 30):
+            if (len(self.scores) == 100 and mean_score >= 30):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agent.save_model()
-                break
-            if (len(self.scores) >= 100 and mean_score < 0):
-                print("Score too small, leave")
                 break
             self.writer.add_scalar("score", score, episode)
             self.writer.add_scalar("replay_buffer_fill_level", len(self.agent.replay_buffer), episode)
 
         self.writer.close()
-        #env.close()
+
         return score
 
 if __name__ == '__main__':
@@ -89,12 +80,7 @@ if __name__ == '__main__':
                       'actor_learning_rate': 0.0001,
                       'critic_learning_rate': 0.0003,
                       'update_every': 10
-                      #hier läuft ein long run mit vielversprechenden werten ohne tune
-                      # aber im vergleich mit noise*epsilon, man könnte auch ohne noise versuchen
-                      # 0.1 er tau war auch gut
-                      # seems large tau is better   
-                      # seems lesser updates of weights are better -> 20
                     }
     env_filename = 'Reacher_Linux_NoVis/Reacher.x86_64'
     env = UnityEnvironment(file_name=env_filename)
-    ContinuousControl(env_filename, hyperparameter).train(env)
+    ContinuousControl(hyperparameter).train(env)

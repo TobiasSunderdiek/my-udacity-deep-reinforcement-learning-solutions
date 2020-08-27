@@ -1,5 +1,4 @@
 from ray import tune
-import random
 from unityagents import UnityEnvironment
 
 from continuous_control import ContinuousControl
@@ -7,7 +6,7 @@ from continuous_control import ContinuousControl
 class Trainable(tune.Trainable):
     def setup(self, hyperparameter):
         self.env_filename = self.logdir + '../../../Reacher_Linux_NoVis/Reacher.x86_64'
-        self.continuous_control = ContinuousControl(self.env_filename, hyperparameter)
+        self.continuous_control = ContinuousControl(hyperparameter)
 
     def step(self):
         env = UnityEnvironment(file_name=self.env_filename)

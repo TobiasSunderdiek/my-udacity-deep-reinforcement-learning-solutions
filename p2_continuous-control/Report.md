@@ -49,6 +49,9 @@ performance drops again
 Again, performance drops
 3) change hyperparameter with tune, describe which hyperparameter and their ranges
 
+**weight_decay for critic optimizer**
+In the DDPG paper[2] the optimizer for the critic has a weight_decay of `10e-2`, after playing around with the other hyperparameters and not getting some progress, I had a look into [3] and changed the weight_decay to `0.0001`.
+
 #### Rewards
 
 The agent reaches a mean reward of #todo over the last 100 episodes after episode #todo.
@@ -68,3 +71,5 @@ The agent reaches a mean reward of #todo over the last 100 episodes after episod
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal
 
 [2] https://arxiv.org/abs/1509.02971
+
+[3] https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L18
