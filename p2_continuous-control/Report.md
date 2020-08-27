@@ -57,7 +57,7 @@ The agent reaches a mean reward of #todo over the last 100 episodes after episod
 
 #### Ideas for Future work
 
-- First of all, maybe switch to multiple agents like described in version 2 of this project could speed-up training due to getting experience in parallel and therefore a larger replay buffer is possible.
+- First of all, maybe switch to multiple agents like described in version 2 of this project could speed-up training due to getting experience in parallel and therefore a larger replay buffer is possible. #todo not correct, replay buffer is filled quickly
 
 - In the notes to the `Benchmark Implementation` from the udacity project, several other algorithms like TRPO, TNPG or D4PG are mentioned to be more stable and to achieve better performance in this project.
 

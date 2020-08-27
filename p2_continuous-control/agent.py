@@ -31,12 +31,12 @@ class Agent:
         # I got how to add weight decay like described in the paper
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
-        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=10e-2)
+        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=0.0001)
         self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) # todo values centered around 0 like in the paper?
         self.update_every = update_every
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
-    def select_action(self, state):
+    def select_action(self, state, epsilon):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L66
         # I added it here
@@ -45,7 +45,7 @@ class Agent:
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy() # todo why is this directly the max action
         self.actor_local.train()
-        action += self.noise()
+        action += self.noise() * epsilon
         return np.clip(action, -1, 1)
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
@@ -88,8 +88,8 @@ class Agent:
     def save_model(self):
         # save only local weights
         # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
-        dict = {'actor_local': self.actor_local.state_dict().cpu(),
-                'critic_local': self.critic_local.state_dict().cpu()}
+        dict = {'actor_local': self.actor_local.state_dict(),
+                'critic_local': self.critic_local.state_dict()}
         torch.save(dict, 'model.pth')
 
     def _sample_from_buffer(self):
