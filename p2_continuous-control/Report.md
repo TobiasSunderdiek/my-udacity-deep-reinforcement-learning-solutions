@@ -40,7 +40,6 @@ The learning rate of the actors' optimizer, actual value `10e-4` like in the DDP
 The learning rate of the critic's optimizer, actual value `10e-3` like in the DDPG paper [2].
 
 **update_every**
-**update_every**
 Controls how often the weights of the target network should be updated, actual value `10`, which means every 10th timestep.
 #todo
 1) As the notes to the `Benchmark Implementation` from the udacity project, the agent is unstable and after a while of training, performance crashed. Like in the benchmark udacity project mentioned, I also add
