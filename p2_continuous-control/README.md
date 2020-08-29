@@ -30,6 +30,7 @@ I choosed to solve `Option 1: Solve the First Version` with 1 agent.
 I used tune[8] for doing grid search for the hyperparameters on ranges I have given.
 - `cd PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p2_continuous-control/`
 - adjust hyperparameter-ranges for grid search in `tune.py`
+- adjust path to reacher environment (see Setup) in `tune.py` in line `self.env_filename = ...` relative to tune logdir, e.g. `self.env_filename = self.logdir + '../../../Reacher_Linux_NoVis/Reacher.x86_64'`
 - `make tune` starts grid search
 
 Some notes on my setup:
