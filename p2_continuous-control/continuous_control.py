@@ -27,6 +27,8 @@ class ContinuousControl:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
+        # after reading the advice from the Udacity Knowledge Base https://knowledge.udacity.com/questions/277763
+        # for this project, that training is possible <500 episodes, I choosed this value
         self.episodes = 500
         self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
         self.scores = deque(maxlen=100)

@@ -11,7 +11,7 @@ class Actor(nn.Module):
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400, 300)
         self.fc_3 = nn.Linear(300, action_size)
-        nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3) #todo correct this way?
+        nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3)
         nn.init.uniform_(self.fc_3.bias, -3*10e-3, 3*10e-3)
 
     def forward(self, input):
@@ -29,14 +29,14 @@ class Critic(nn.Module):
         self.seed = torch.manual_seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L58
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400+action_size, 300)
-        self.fc_3 = nn.Linear(300, 1) #todo why map to 1?
-        nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3) #todo correct this way?
+        self.fc_3 = nn.Linear(300, 1) #todo understand why map to 1
+        nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3)
         nn.init.uniform_(self.fc_3.bias, -3*10e-3, 3*10e-3)
 
     def forward(self, input, action):
         x = F.leaky_relu(self.fc_1(input))
         x = torch.cat((x, action), dim=1)
         x = F.leaky_relu(self.fc_2(x))
-        x = self.fc_3(x) # why no activation?
+        x = self.fc_3(x) # todo understand why no activation
 
         return x

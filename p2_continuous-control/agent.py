@@ -32,7 +32,7 @@ class Agent:
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=0.0001)
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) # todo values centered around 0 like in the paper?
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         self.update_every = update_every
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
@@ -43,7 +43,7 @@ class Agent:
         state = torch.FloatTensor(state).to(self.device)
         self.actor_local.eval()
         with torch.no_grad():
-            action = self.actor_local(state).cpu().data.numpy() # todo why is this directly the max action
+            action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
         action += self.noise() * epsilon
         return np.clip(action, -1, 1)
@@ -62,6 +62,8 @@ class Agent:
             critic_loss = F.mse_loss(local_q_values, target_q_values)
             self.critic_local_optimizer.zero_grad()
             critic_loss.backward()
+            # I copied this from the course in 'Benchmark Implementation' where the udacity's benchmark implementation for this project
+            # is described and some special settings are explicitly highlighted  
             torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
             self.critic_local_optimizer.step()
             self.critic_local.eval()
