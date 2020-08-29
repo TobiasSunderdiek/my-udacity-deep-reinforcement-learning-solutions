@@ -4,6 +4,6 @@ tensorboard==1.15
 git+https://github.com/openai/baselines.git
 ray==0.8.7
 tabulate
-tensorboardX #todo
-cloudpickle==1.6.0 #todo
-grpcio==1.31.0 #todo
+#tensorboardX #todo
+#cloudpickle==1.6.0 #todo
+#grpcio==1.31.0 #todo

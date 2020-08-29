@@ -38,6 +38,9 @@ Some notes on my setup:
 - I played around with various hyperparameter ranges in `tune.py`, the version in this commit is only the last version in a row
 - I did not configure my setup properly and get a `'OSError: handle is closed' exception` during the whole process, which I did not investigate further. Important to mention that this is a problem of how I configured my whole machine, this is not a problem coming from tune.
 
+## Saved model weights
+Saved model weights of successfully trained agent are provided in `model.pth`
+
 ## Udacity Honor Code
 1. Some of the commits in this project are made by user `Ubuntu`, but it was me. I did some training of the project in AWS and pushed changes directly from E2C-Instance to github, but did not change the VM-Image's git username `Ubuntu` (and email) to my personal data.
 
