@@ -16,13 +16,6 @@ class ContinuousControl:
     def __init__(self, hyperparameter):
         observation_state_size = 33
         action_space_size = 4
-        gamma= hyperparameter['gamma']
-        sample_batch_size = hyperparameter['sample_batch_size']
-        replay_buffer_size = hyperparameter['replay_buffer_size']
-        tau = hyperparameter['tau']
-        actor_learning_rate = hyperparameter['actor_learning_rate']
-        critic_learning_rate = hyperparameter['critic_learning_rate']
-        update_every = hyperparameter['update_every']
         epsilon_start = 0.1
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
@@ -30,7 +23,9 @@ class ContinuousControl:
         # after reading the advice from the Udacity Knowledge Base https://knowledge.udacity.com/questions/277763
         # for this project, that training is possible <500 episodes, I choosed this value
         self.episodes = 500
-        self.agent = Agent(observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every)
+        # Changes from udacity code review: In my first implementation, I passed all hyperparameters as single parameters to the agent
+        # udacity code review suggests me to remove this and use one single param which has all hyperparameters in a map instead
+        self.agent = Agent(observation_state_size, action_space_size, hyperparameter)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 

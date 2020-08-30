@@ -4,6 +4,10 @@
 
 I have choosen a DDPG [2] to solve this environment. The DDPG consists of a total of 4 neural networks, divided into Actor (local version and target version) and Critic (local version and target version). The Actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward. This is not a stochastic output from which the action is choosen like in PPO. To enable exploration, a noise is added to every predicted action. The critic predicts the best Q-Value for a state, as in DQN, but with the speciality that the action is added to the observation input. Both of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep.
 
+ I used the Ornstein-Uhlenbeck implementation from OpenAI-Baselines[5].
+
+ I used the ReplayBuffer implementation from OpenAI-Baselines[6].
+
 #### Model
 
 I use the DDPG architecture from the DDPG paper[2] section 7 `Experiment Details`.
@@ -44,7 +48,7 @@ Controls how often the weights of the target network should be updated, actual v
 **weight_decay for critic optimizer**
 In the DDPG paper[2] the optimizer for the critic has a weight_decay of `10e-2`, after playing around with the other hyperparameters and not getting some progress, I had a look into [3] and changed the weight_decay to `0.0001`.
 
-**Noise**
+**noise**
 In the DDPG paper[2] to enable exploration, a noise generated with an Ornstein-Uhlenbeck process is added to the selected action. The Noise is configured with θ = 0.15 and σ = 0.2.
 
 **epsilon**
@@ -82,3 +86,7 @@ The agent reaches a mean reward of 30 over the last 100 episodes after episode 2
 [3] https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L18
 
 [4] https://knowledge.udacity.com/questions/277763
+
+[5] https://github.com/openai/baselines/blob/master/baselines/ddpg/noise.py#L49
+
+[6] https://github.com/openai/baselines/blob/master/baselines/deepq/replay_buffer.py#L7

@@ -8,7 +8,7 @@ from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 from model import Actor, Critic
 
 class Agent:
-    def __init__(self, observation_state_size, action_space_size, sample_batch_size, replay_buffer_size, gamma, tau, actor_learning_rate, critic_learning_rate, update_every):
+    def __init__(self, observation_state_size, action_space_size, hyperparameter):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
@@ -22,18 +22,18 @@ class Agent:
         self.actor_target = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.critic_local = Critic(observation_state_size, action_space_size, seed).to(self.device)
         self.critic_target = Critic(observation_state_size, action_space_size, seed).to(self.device)
-        self.sample_batch_size = sample_batch_size
-        self.replay_buffer_size = replay_buffer_size
+        self.sample_batch_size = hyperparameter['sample_batch_size']
+        self.replay_buffer_size = hyperparameter['replay_buffer_size']
         self.replay_buffer = ReplayBuffer(self.replay_buffer_size)
-        self.gamma = gamma
-        self.tau = tau
-        self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), actor_learning_rate)
+        self.gamma = hyperparameter['gamma']
+        self.tau = hyperparameter['tau']
+        self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), hyperparameter['actor_learning_rate'])
         # I got how to add weight decay like described in the paper
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
-        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(), critic_learning_rate, weight_decay=0.0001)
+        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'], weight_decay=0.0001)
         self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
-        self.update_every = update_every
+        self.update_every = hyperparameter['update_every']
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state, epsilon):

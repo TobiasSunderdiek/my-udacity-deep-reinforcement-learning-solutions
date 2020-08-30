@@ -2,12 +2,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
-# and from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L12
 class Actor(nn.Module):
+    """ I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
+        and from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L12
+    """
     def __init__(self, input_size, action_size, seed):
         super().__init__()
-        self.seed = torch.manual_seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L26
+        # I got using a seed from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L26
+        # and added it as I did not use a seed in my implementation
+        # Changes from udacity code review: In my first implementation I assigned the seed to a class variable(but never used it) and the
+        # udacity code review suggests me to remove this class variable as I do not need it in my implementation
+        torch.manual_seed(seed)
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400, 300)
         self.fc_3 = nn.Linear(300, action_size)
@@ -21,12 +26,17 @@ class Actor(nn.Module):
 
         return x
 
-# I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
-# and copied it from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L44
 class Critic(nn.Module):
+    """ I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
+        and copied it from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L44
+    """
     def __init__(self, input_size, action_size, seed):
         super().__init__()
-        self.seed = torch.manual_seed(seed) # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L58
+        # I got using a seed from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L58
+        # and added it as I did not use a seed in my implementation
+        # Changes from udacity code review: In my first implementation I assigned the seed to a class variable(but never used it) and the
+        # udacity code review suggests me to remove this class variable as I do not need it in my implementation
+        torch.manual_seed(seed)
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400+action_size, 300)
         self.fc_3 = nn.Linear(300, 1) #todo understand why map to 1

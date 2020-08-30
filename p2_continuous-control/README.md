@@ -51,6 +51,13 @@ Saved model weights of successfully trained agent are provided in `model.pth`
 - training is possible < 500 episodes
 - reduce noise which is added to action over time
 
+## Changes to project from Udacity Code Review
+
+I changed the following parts suggested by Udacity's code review:
+- added docstring to actor and critic
+- removed unused assignment to class-variable in actor and critic when using seed `torch.manual_seed(seed)` in `model.py`
+- instead of passing every hyperparam as single param to agent, use `map` with all hyperparams as one single param instead
+
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p2_continuous-control
 
 [2] https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher
