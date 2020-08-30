@@ -58,6 +58,9 @@ I changed the following parts suggested by Udacity's code review:
 - removed unused assignment to class-variable in actor and critic when using seed `torch.manual_seed(seed)` in `model.py`
 - instead of passing every hyperparam as single param to agent, use `map` with all hyperparams as one single param instead
 
+Additionally I changed the following:
+- added references to Ornstein-Uhlenbeck Noise and ReplayBuffer implementations from OpenAI-Baselines, which I used in my implementation, to Report
+
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p2_continuous-control
 
 [2] https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher
