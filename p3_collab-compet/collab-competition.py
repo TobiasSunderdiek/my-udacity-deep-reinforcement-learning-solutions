@@ -14,8 +14,8 @@ from epsilon import Epsilon
 
 class CollaborationAndCompetition:
     def __init__(self, hyperparameter):
-        observation_state_size = 33 #todo
-        action_space_size = 4 #todo
+        observation_state_size = 8
+        action_space_size = 2
         epsilon_start = 0.1
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
@@ -29,7 +29,8 @@ class CollaborationAndCompetition:
     def train(self, env):
         brain_name = env.brain_names[0]
         for episode in range(1, self.episodes+1):
-            state = env.reset(train_mode=True)[brain_name].vector_observations[0]
+            all_agents_states = env.reset(train_mode=True)[brain_name].vector_observations
+            print(f'state {all_agents_states}')
             score = 0
             timestep = 0
             # reset noise

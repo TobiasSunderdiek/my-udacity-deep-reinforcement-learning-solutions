@@ -8,10 +8,10 @@ Banana.app
 navigation-venv/
 udacity_deep_reinforcement_learning/
 .vscode/
-p1_navigation/unity-environment.log
 p2_continuous-control/control-venv/
 Reacher.app
-p2_continuous-control/unity-environment.log
+unity-environment.log
 Reacher_Linux_NoVis/
 Tennis.app
 p3_collab-compet/collab-venv
+runs/
