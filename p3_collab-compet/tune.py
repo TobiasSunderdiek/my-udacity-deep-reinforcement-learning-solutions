@@ -1,16 +1,16 @@
 from ray import tune
 from unityagents import UnityEnvironment
 
-from collab-competition import CollaborationAndCompetition
+from collab_competition import CollaborationAndCompetition
 
 class Trainable(tune.Trainable):
     def setup(self, hyperparameter):
         self.env_filename = self.logdir + '../../../Tennis_Linux_NoVis/Tennis.x86_64'
-        self.continuous_control = CollaborationAndCompetition(hyperparameter)
+        self.collab_competition = CollaborationAndCompetition(hyperparameter)
 
     def step(self):
         env = UnityEnvironment(file_name=self.env_filename)
-        score = self.continuous_control.train(env)
+        score = self.collab_competition.train(env)
         env.close()
         return {'score': score}
 
@@ -31,5 +31,5 @@ tune.run(
     num_samples=1,
     local_dir='./runs',
     verbose=1,
-    resources_per_trial={"cpu": 4, "gpu": 1}#todo
+    resources_per_trial={"cpu": 1, "gpu": 0}#todo
 )

@@ -24,7 +24,7 @@ class CollaborationAndCompetition:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 2 #todo 3_000
+        self.episodes = 20 #todo 3_000
         self.num_agents = 2
         self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)

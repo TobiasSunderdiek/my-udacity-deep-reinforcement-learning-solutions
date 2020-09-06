@@ -31,7 +31,6 @@ class Agent:
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state, epsilon):
-        print(f'select action for state {state} {state.shape}')#todo
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L66
         # I added it here

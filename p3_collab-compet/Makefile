@@ -8,7 +8,7 @@ install:
 	pip install -r requirements.txt
 
 train:
-	python collab-competition.py
+	python collab_competition.py
 
 tune:
 	python tune.py
