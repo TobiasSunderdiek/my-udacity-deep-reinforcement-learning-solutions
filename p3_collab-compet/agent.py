@@ -1,8 +1,6 @@
 import torch
 import torch.optim as optimizer
-import torch.nn.functional as F
 import numpy as np
-from baselines.deepq.replay_buffer import ReplayBuffer
 from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 
 from model import Actor, Critic
@@ -22,10 +20,6 @@ class Agent:
         self.actor_target = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.critic_local = Critic(observation_state_size, action_space_size, seed).to(self.device)
         self.critic_target = Critic(observation_state_size, action_space_size, seed).to(self.device)
-        self.sample_batch_size = hyperparameter['sample_batch_size']
-        self.replay_buffer_size = hyperparameter['replay_buffer_size']
-        self.replay_buffer = ReplayBuffer(self.replay_buffer_size)
-        self.gamma = hyperparameter['gamma']
         self.tau = hyperparameter['tau']
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), hyperparameter['actor_learning_rate'])
         # I got how to add weight decay like described in the paper
@@ -37,6 +31,7 @@ class Agent:
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state, epsilon):
+        print(f'select action for state {state} {state.shape}')#todo
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L66
         # I added it here
@@ -48,44 +43,12 @@ class Agent:
         action += self.noise() * epsilon
         return np.clip(action, -1, 1)
 
-    # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
-    def learn(self, timestep):
-        # only learn if enough data available
-        # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
-        if(len(self.replay_buffer) >= self.sample_batch_size):
-            # critic
-            self.critic_local.train()
-            states, actions, rewards, next_states, dones = self._sample_from_buffer()
-            local_q_values = self.critic_local(states, actions)
-            next_actions = self.actor_target(next_states)
-            target_q_values = rewards + (self.gamma * self.critic_target(next_states, next_actions) * (1 - dones))
-            critic_loss = F.mse_loss(local_q_values, target_q_values)
-            self.critic_local_optimizer.zero_grad()
-            critic_loss.backward()
-            #todo previous project# I copied this from the course in 'Benchmark Implementation' where the udacity's benchmark implementation for this project
-            # is described and some special settings are explicitly highlighted  
-            torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
-            self.critic_local_optimizer.step()
-            self.critic_local.eval()
-            self.soft_update(self.critic_target, self.critic_local, timestep)
-
-            # actor
-            actions_local = self.actor_local(states)
-            actor_loss = -self.critic_local(states, actions_local).mean()
-            self.actor_local_optimizer.zero_grad()
-            actor_loss.backward()
-            self.actor_local_optimizer.step()
-            self.soft_update(self.actor_target, self.actor_local, timestep)
-
     # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
     def soft_update(self, target_network, local_network, timestep):
-        #todo previous project # as mentioned in the udacity benchmark project, update weights only every x-timesteps
+        # as mentioned in the udacity benchmark project of the previous project 2 continuous control, update weights only every x-timesteps
         if (timestep % self.update_every == 0):
             for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
                 target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
-
-    def add_to_buffer(self, state, action, reward, next_state, done):
-        self.replay_buffer.add(state, action, reward, next_state, done)
 
     def save_model(self):
         # save only local weights
@@ -93,19 +56,6 @@ class Agent:
         dict = {'actor_local': self.actor_local.state_dict(),
                 'critic_local': self.critic_local.state_dict()}
         torch.save(dict, 'model.pth')
-
-    def _sample_from_buffer(self):
-        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
-        # forgot to(device), after having a look at
-        # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L179
-        # I added it here
-        states = torch.FloatTensor(states).to(self.device)
-        actions = torch.FloatTensor(actions).to(self.device)
-        rewards = torch.FloatTensor(rewards).unsqueeze(-1).to(self.device)
-        next_states = torch.FloatTensor(next_states).to(self.device)
-        # dones: convert True/False to 0/1
-        dones = torch.FloatTensor(np.where(dones == True, 1, 0)).unsqueeze(-1).to(self.device)
-        return states, actions, rewards, next_states, dones
 
     def reset_noise(self):
         self.noise.reset()

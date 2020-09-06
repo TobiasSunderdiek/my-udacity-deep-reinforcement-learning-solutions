@@ -1,7 +1,8 @@
 ###########################################
-# This file is based on the jupyter notebook
-# https://github.com/udacity/deep-reinforcement-learning/blob/master/p3_collab-compet/Tennis.ipynb
-# provided by udacity
+# This file is based on
+# - the jupyter notebook https://github.com/udacity/deep-reinforcement-learning/blob/master/p3_collab-compet/Tennis.ipynb
+# - the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
+# both provided by Udacity
 ###########################################
 
 from unityagents import UnityEnvironment
@@ -9,20 +10,23 @@ import numpy as np
 from collections import deque
 from torch.utils.tensorboard import SummaryWriter
 
-from agent import Agent
+from multi_agent import MultiAgent
 from epsilon import Epsilon
 
 class CollaborationAndCompetition:
     def __init__(self, hyperparameter):
-        observation_state_size = 8
+        # todo comment:
+        # Vector Observation space size (per agent): 8
+        # Number of stacked Vector Observation: 3
+        observation_state_size = 24
         action_space_size = 2
         epsilon_start = 0.1
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 500 #todo
-        # I got using single param for all hyperparameters from udacity code review for my previous project
-        self.agent = Agent(observation_state_size, action_space_size, hyperparameter)
+        self.episodes = 2 #todo 3_000
+        self.num_agents = 2
+        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
@@ -30,39 +34,38 @@ class CollaborationAndCompetition:
         brain_name = env.brain_names[0]
         for episode in range(1, self.episodes+1):
             all_agents_states = env.reset(train_mode=True)[brain_name].vector_observations
-            print(f'state {all_agents_states}')
-            score = 0
+            all_agents_score = np.zeros(self.num_agents)
             timestep = 0
-            # reset noise
-            # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
-            self.agent.reset_noise
+            self.agents.reset_noise
 
             while True:
                 current_epsilon = self.epsilon.calculate_for(timestep)
-                action = self.agent.select_action(state, current_epsilon)
-                env_info = env.step(action)[brain_name]
-                next_state, reward, done = env_info.vector_observations[0], env_info.rewards[0], env_info.local_done[0]
-                self.agent.add_to_buffer(state, action, reward, next_state, done)
-                self.agent.learn(timestep)
-                score += reward
-                state = next_state
+                all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
+                env_info = env.step(all_agents_actions)[brain_name]
+                all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
+                self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+                self.agents.learn(timestep)
+                all_agents_score += all_agents_rewards
+                all_agents_states = all_agents_next_states
                 timestep += 1
-                if done:
+                if any(all_agents_dones):
                     break
-
-            self.scores.append(score)
+            max_score = max(all_agents_score)
+            self.scores.append(max_score)
             mean_score = np.mean(self.scores)
             if (episode % 10 == 0):
-                print(f'Episode {episode} mean score {mean_score}')
-            if (len(self.scores) == 100 and mean_score >= 30): #todo
+                print(f'Episode {episode} mean score {mean_score} max score {max_score}')
+            if (len(self.scores) == 100 and mean_score >= 0.5):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
-                self.agent.save_model()
+                #self.agent.save_model() #todo implement save
                 break
-            self.writer.add_scalar("score", score, episode)
+            for i in range(self.num_agents):
+                self.writer.add_scalar(f'score_agent_{i}', all_agents_score[i], episode)
+            self.writer.add_scalar("mean_score", mean_score, episode)
 
         self.writer.close()
 
-        return score
+        return max_score
 
 if __name__ == '__main__':
     hyperparameter = {'gamma': 0.99,
