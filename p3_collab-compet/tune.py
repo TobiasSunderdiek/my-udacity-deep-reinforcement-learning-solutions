@@ -5,7 +5,8 @@ from collab_competition import CollaborationAndCompetition
 
 class Trainable(tune.Trainable):
     def setup(self, hyperparameter):
-        self.env_filename = self.logdir + '../../../Tennis.app'
+        #self.env_filename = self.logdir + '../../../Tennis.app'
+        self.env_filename = '/data/Tennis_Linux_NoVis/Tennis'
         self.collab_competition = CollaborationAndCompetition(hyperparameter)
 
     def step(self):
