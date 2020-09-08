@@ -46,15 +46,14 @@ class MultiAgent:
                 #next_actions = self.agents[i].actor_target(all_agents_next_states[i]) all_agents_next_actions
                 all_agents_next_states_tranpose =  torch.transpose(all_agents_next_states, 0, 1)#[128, 2, 24] -> [2, 128, 24]
                 all_agents_next_actions = []
-                for i in range(self.num_agents):
-                    next_states_agent_i = all_agents_next_states_tranpose[i]
-                    agent_i_action = self.agents[i].actor_target(next_states_agent_i)
-                    all_agents_next_actions.append(agent_i_action)
+                for j in range(self.num_agents):
+                    next_states_agent_j = all_agents_next_states_tranpose[j]
+                    agent_j_action = self.agents[j].actor_target(next_states_agent_j)
+                    all_agents_next_actions.append(agent_j_action)
                 all_agents_next_actions = torch.cat(all_agents_next_actions, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
                 #all_agents_next_actions = self.agents[i].actor_target(all_agents_next_states) #todo for every agent i and sum?
                 rewards_transpose = torch.transpose(all_agents_rewards, 0, 1) #(128,2,1) -> (2,128,1)
                 reward_of_i = rewards_transpose[i]
-                print(f'all_agents_dones {all_agents_dones.shape}')
                 all_agents_dones_transpose = torch.transpose(all_agents_dones, 0, 1) #128,2,1 -> 2,128,1
                 all_agents_dones_of_i = all_agents_dones_transpose[i]
                 #target_q_values = all_agents_rewards[i] + (self.gamma * self.agents[i].critic_target(all_agents_next_states[i], next_actions) * (1 - all_agents_dones[i])) #todo
@@ -70,10 +69,16 @@ class MultiAgent:
                 self.agents[i].soft_update(self.agents[i].critic_target, self.agents[i].critic_local, timestep)
 
             # actor
-            actions_local = self.agents[i].actor_local(all_agents_states[i])
+            all_agent_states_transpose = torch.transpose(all_agents_states, 0, 1)
+            all_actions_local = []
+            for k in range(self.num_agents):
+                actions_local = self.agents[k].actor_local(all_agent_states_transpose[k])
+                all_actions_local.append(actions_local)
+            all_actions_local = torch.cat(all_actions_local, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
             # todo critic works wiht all obs
             # + comment maddpg implementation todo
-            actor_loss = -self.agents[i].critic_local(all_agents_states[i], actions_local).mean()
+            #actor_loss = -self.agents[i].critic_local(all_agents_states[i], actions_local).mean()
+            actor_loss = -self.agents[i].critic_local(torch.reshape(all_agents_states, (128, 48)), all_actions_local).mean()
             self.agents[i].actor_local_optimizer.zero_grad()
             actor_loss.backward()
             self.agents[i].actor_local_optimizer.step()
