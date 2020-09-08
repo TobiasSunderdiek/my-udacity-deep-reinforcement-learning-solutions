@@ -15,17 +15,14 @@ from epsilon import Epsilon
 
 class CollaborationAndCompetition:
     def __init__(self, hyperparameter):
-        # todo comment:
-        # Vector Observation space size (per agent): 8
-        # Number of stacked Vector Observation: 3
+        self.num_agents = 2
         observation_state_size = 24
         action_space_size = 2
         epsilon_start = 0.1
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 20 #todo 3_000
-        self.num_agents = 2
+        self.episodes = 3_000
         self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -53,7 +50,7 @@ class CollaborationAndCompetition:
             max_score = max(all_agents_score)
             self.scores.append(max_score)
             mean_score = np.mean(self.scores)
-            if (episode % 10 == 0):
+            if (episode % 100 == 0):
                 print(f'Episode {episode} mean score {mean_score} max score {max_score}')
             if (len(self.scores) == 100 and mean_score >= 0.5):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')

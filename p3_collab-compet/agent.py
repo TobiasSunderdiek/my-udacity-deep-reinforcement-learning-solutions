@@ -18,8 +18,8 @@ class Agent:
         seed = 2
         self.actor_local = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.actor_target = Actor(observation_state_size, action_space_size, seed).to(self.device)
-        self.critic_local = Critic(observation_state_size, action_space_size, seed).to(self.device)
-        self.critic_target = Critic(observation_state_size, action_space_size, seed).to(self.device)
+        self.critic_local = Critic(observation_state_size*2, action_space_size*2, seed).to(self.device)#todo *2 is num_agents, add dynamically
+        self.critic_target = Critic(observation_state_size*2, action_space_size*2, seed).to(self.device)#todo *2 is num_agents, add dynamically
         self.tau = hyperparameter['tau']
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), hyperparameter['actor_learning_rate'])
         # I got how to add weight decay like described in the paper

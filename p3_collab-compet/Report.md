@@ -10,12 +10,15 @@
 - Agent learn method moved to multi agent
 - learn method for critic TODO, just made it work an delegate to every agents critic instead use all_obs
 - update soft different than in benchmark implementation and paper,done in learn step for every agent
-- obs is 3*8:
+- observation space is is 3*8:
 # Vector Observation space size (per agent): 8
 # Number of stacked Vector Observation: 3
 to track motion
+- num of episodes 3000: benchmark impementation image shows, that is can be solved within 2500 episodes
 
-code based on the MADDPG-Lab implemmentation of the Physical Deception Problem, which is not public available (Udacity course material)
+- comment that code is based on the MADDPG-Lab implemmentation of the Physical Deception Problem, which is not public available (Udacity course material)
+- critic q gets ALL obs of with all agents and all agents of all agents to calculate loss for singe agent i/ every i agent gets ALL infos
+- therefore model of critic as input obs*num_agents and actions*num_agents
 
 I have choosen a DDPG [2] to solve this environment. The DDPG consists of a total of 4 neural networks, divided into Actor (local version and target version) and Critic (local version and target version). The Actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward. This is not a stochastic output from which the action is choosen like in PPO. To enable exploration, a noise is added to every predicted action. The critic predicts the best Q-Value for a state, as in DQN, but with the speciality that the action is added to the observation input. Both of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep.
 

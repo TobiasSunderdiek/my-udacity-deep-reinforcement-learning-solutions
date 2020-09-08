@@ -41,9 +41,24 @@ class MultiAgent:
                 self.agents[i].critic_local.train()
                 #todo q value works with all obs, not single agent
                 # + comment got it from lab maddpg implementation #todo
-                local_q_values = self.agents[i].critic_local(all_agents_states[i], all_agents_actions[i]) #todo
-                next_actions = self.agents[i].actor_target(all_agents_next_states[i])
-                target_q_values = all_agents_rewards[i] + (self.gamma * self.agents[i].critic_target(all_agents_next_states[i], next_actions) * (1 - all_agents_dones[i])) #todo
+                #local_q_values = self.agents[i].critic_local(all_agents_states[i], all_agents_actions[i]) #todo
+                local_q_values = self.agents[i].critic_local(torch.reshape(all_agents_states, (128, 48)), torch.reshape(all_agents_actions, (128, 4))) #todo/change insert full batch and reshape
+                #next_actions = self.agents[i].actor_target(all_agents_next_states[i]) all_agents_next_actions
+                all_agents_next_states_tranpose =  torch.transpose(all_agents_next_states, 0, 1)#[128, 2, 24] -> [2, 128, 24]
+                all_agents_next_actions = []
+                for i in range(self.num_agents):
+                    next_states_agent_i = all_agents_next_states_tranpose[i]
+                    agent_i_action = self.agents[i].actor_target(next_states_agent_i)
+                    all_agents_next_actions.append(agent_i_action)
+                all_agents_next_actions = torch.cat(all_agents_next_actions, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
+                #all_agents_next_actions = self.agents[i].actor_target(all_agents_next_states) #todo for every agent i and sum?
+                rewards_transpose = torch.transpose(all_agents_rewards, 0, 1) #(128,2,1) -> (2,128,1)
+                reward_of_i = rewards_transpose[i]
+                print(f'all_agents_dones {all_agents_dones.shape}')
+                all_agents_dones_transpose = torch.transpose(all_agents_dones, 0, 1) #128,2,1 -> 2,128,1
+                all_agents_dones_of_i = all_agents_dones_transpose[i]
+                #target_q_values = all_agents_rewards[i] + (self.gamma * self.agents[i].critic_target(all_agents_next_states[i], next_actions) * (1 - all_agents_dones[i])) #todo
+                target_q_values = reward_of_i + (self.gamma * self.agents[i].critic_target(torch.reshape(all_agents_next_states, (128,48)), all_agents_next_actions) * (1 - all_agents_dones_of_i)) #todo/change insert full batch, add all_agents_next_actions, add reward_of_i agent
                 critic_loss = F.mse_loss(local_q_values, target_q_values)#todo huber loss
                 self.agents[i].critic_local_optimizer.zero_grad()
                 critic_loss.backward()
