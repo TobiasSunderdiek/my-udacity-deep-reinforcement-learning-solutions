@@ -96,3 +96,16 @@ class MultiAgent:
         # dones: convert True/False to 0/1
         dones = torch.FloatTensor(np.where(dones == True, 1, 0)).unsqueeze(-1).to(self.device)
         return states, actions, rewards, next_states, dones
+
+    def save(self):
+        data = {}
+        for i in range(self.num_agents):
+            # 1. save weights and optimizer
+            #    got this from Udacity's MADDPG-Lab-Implemetation
+            # 2. merge dicts, got this from here: https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python-taking-union-o
+            data.update({'actor_local_'+i: self.agents[i].actor_local.state_dict(),
+                        'critic_local_'+i: self.agents[i].critic_local.state_dict(),
+                        'actor_local_optimizer_'+i: self.agents[i].actor_local_optimizer.state_dict(),
+                        'critic_local_optimizer_'+i: self.agents[i].critic_local_optimizer.state_dict()
+                        })
+        torch.save(data, 'model.pth')

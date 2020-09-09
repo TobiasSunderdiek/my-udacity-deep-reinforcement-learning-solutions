@@ -52,9 +52,9 @@ class CollaborationAndCompetition:
             mean_score = np.mean(self.scores)
             if (episode % 100 == 0):
                 print(f'Episode {episode} mean score {mean_score} max score {max_score}')
-            if (len(self.scores) == 500 and mean_score >= 0.5):
+            if (len(self.scores) == 100 and mean_score >= 0.5):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
-                #self.agent.save_model() #todo implement save
+                self.agents.save()
                 break
             for i in range(self.num_agents):
                 self.writer.add_scalar(f'score_agent_{i}', all_agents_score[i], episode)

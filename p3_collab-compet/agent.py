@@ -49,12 +49,5 @@ class Agent:
             for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
                 target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
 
-    def save_model(self):
-        # save only local weights
-        # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
-        dict = {'actor_local': self.actor_local.state_dict(),
-                'critic_local': self.critic_local.state_dict()}
-        torch.save(dict, 'model.pth')
-
     def reset_noise(self):
         self.noise.reset()
