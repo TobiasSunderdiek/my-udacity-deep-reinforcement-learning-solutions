@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from multi_agent import MultiAgent
 from epsilon import Epsilon
+import torch #todo only for testing
 
 class CollaborationAndCompetition:
     def __init__(self, hyperparameter):
@@ -38,11 +39,21 @@ class CollaborationAndCompetition:
             while True:
                 current_epsilon = self.epsilon.calculate_for(timestep)
                 all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
+                all_agents_actions = np.asarray(all_agents_actions)
+                #print('my')
+                #print(all_agents_actions)
+                #todo remove
+                #all_agents_actions = np.random.randn(self.num_agents, 2) # select an action (for each agent)
+                #all_agents_actions = np.clip(all_agents_actions, -1, 1)
+                #print('rand')
+                #print(all_agents_actions) 
+
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
                 self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 self.agents.learn(timestep)
                 all_agents_score += all_agents_rewards
+                #print(all_agents_rewards)
                 all_agents_states = all_agents_next_states
                 timestep += 1
                 if any(all_agents_dones):
@@ -65,15 +76,17 @@ class CollaborationAndCompetition:
         return max_score
 
 if __name__ == '__main__':
-    hyperparameter = {'gamma': 0.99,
-                      'sample_batch_size': 128,
+    #todo this are the params from the paper
+    # https://arxiv.org/pdf/1706.02275.pdf
+    hyperparameter = {'gamma': 0.95,
+                      'sample_batch_size': 1024,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
                       # otherwise index error due to float
                       'replay_buffer_size': int(1e6),
                       'tau': 0.01,
-                      'actor_learning_rate': 0.0001,
-                      'critic_learning_rate': 0.0003,
-                      'update_every': 10
+                      'actor_learning_rate': 0.01,
+                      'critic_learning_rate': 0.01,
+                      'update_every': 100
                     }
     env_filename = 'Tennis.app'
     env = UnityEnvironment(file_name=env_filename)

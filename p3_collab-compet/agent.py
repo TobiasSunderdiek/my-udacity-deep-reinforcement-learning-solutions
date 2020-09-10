@@ -26,7 +26,8 @@ class Agent:
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'], weight_decay=0.0001)
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
+        # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.9, theta=0.15)
         self.update_every = hyperparameter['update_every']
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
@@ -39,7 +40,11 @@ class Agent:
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
-        action += self.noise() * epsilon
+        #print(f'action vorher {action}')
+        tmp = self.noise() * epsilon
+        action += tmp
+        #action += self.noise() * epsilon #todo
+        #print(f'action nachher {action} mit noise {tmp}')
         return np.clip(action, -1, 1)
 
     # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119

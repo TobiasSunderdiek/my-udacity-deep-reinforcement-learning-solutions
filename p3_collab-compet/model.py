@@ -16,8 +16,13 @@ class Actor(nn.Module):
         self.fc_1 = nn.Linear(input_size, 400)
         self.fc_2 = nn.Linear(400, 300)
         self.fc_3 = nn.Linear(300, action_size)
-        nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3)
-        nn.init.uniform_(self.fc_3.bias, -3*10e-3, 3*10e-3)
+        #todo nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3)
+        #todo
+        # numpy.randn from jupyter make points
+        # this is normal distribution, see: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
+        # so change to normal distribution
+        #nn.init.normal_(self.fc_3.weight, 0.0, 1.0)
+        #nn.init.uniform_(self.fc_3.bias, -3*10e-3, 3*10e-3)
 
     def forward(self, input):
         x = F.leaky_relu(self.fc_1(input))
