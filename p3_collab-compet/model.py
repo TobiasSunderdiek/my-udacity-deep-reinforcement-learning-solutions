@@ -23,8 +23,8 @@ class Actor(nn.Module):
         # numpy.randn from jupyter make points
         # this is normal distribution, see: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
         # so change to normal distribution
-        #nn.init.normal_(self.fc_3.weight, 0.0, 1.0)
-        #nn.init.normal_(self.fc_3.bias, 0.0, 1.0)
+        nn.init.normal_(self.fc_3.weight, 0.0, 0.05)
+        nn.init.normal_(self.fc_3.bias, 0.0, 0.05)
 
     def forward(self, input):
         x = F.leaky_relu(self.fc_1(input))
