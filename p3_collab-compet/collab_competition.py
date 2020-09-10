@@ -53,16 +53,19 @@ class CollaborationAndCompetition:
                 self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 self.agents.learn(timestep)
                 all_agents_score += all_agents_rewards
-                #print(all_agents_rewards)
+                #print(f'all_agents_rewards {all_agents_rewards}')
+                #print(f'all_agents_score {all_agents_score}')
                 all_agents_states = all_agents_next_states
                 timestep += 1
                 if any(all_agents_dones):
                     break
             max_score = max(all_agents_score)
+            if max_score >= 0.1:#todo remove
+                print(f'max_score {max_score}')
             self.scores.append(max_score)
             mean_score = np.mean(self.scores)
             if (episode % 100 == 0):
-                print(f'Episode {episode} mean score {mean_score} max score {max_score}')
+                print(f'Episode {episode} mean score {mean_score}')
             if (len(self.scores) == 100 and mean_score >= 0.5):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
                 self.agents.save()
