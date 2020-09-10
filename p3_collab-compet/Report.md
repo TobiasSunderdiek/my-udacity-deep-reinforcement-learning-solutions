@@ -20,6 +20,8 @@ to track motion
 - critic q gets ALL obs of with all agents and all agents of all agents to calculate loss for singe agent i/ every i agent gets ALL infos
 - therefore model of critic as input obs*num_agents and actions*num_agents
 
+- new hyperparameter init_weights_variance, hidden_layer_1, hidden_layer_2
+
 I have choosen a DDPG [2] to solve this environment. The DDPG consists of a total of 4 neural networks, divided into Actor (local version and target version) and Critic (local version and target version). The Actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward. This is not a stochastic output from which the action is choosen like in PPO. To enable exploration, a noise is added to every predicted action. The critic predicts the best Q-Value for a state, as in DQN, but with the speciality that the action is added to the observation input. Both of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep.
 
  I used the Ornstein-Uhlenbeck implementation from OpenAI-Baselines[5].

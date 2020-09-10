@@ -91,7 +91,10 @@ if __name__ == '__main__':
                       'tau': 0.01,
                       'actor_learning_rate': 0.01,
                       'critic_learning_rate': 0.01,
-                      'update_every': 100
+                      'update_every': 100,
+                      'init_weights_variance': 0.8,
+                      'hidden_layer_1': 300,
+                      'hidden_layer_2': 300
                     }
     env_filename = 'Tennis.app'
     env = UnityEnvironment(file_name=env_filename)
