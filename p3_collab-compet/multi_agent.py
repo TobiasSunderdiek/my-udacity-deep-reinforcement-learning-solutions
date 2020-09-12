@@ -68,21 +68,21 @@ class MultiAgent:
                 self.agents[i].critic_local.eval()
                 self.agents[i].soft_update(self.agents[i].critic_target, self.agents[i].critic_local, timestep)
 
-            # actor
-            all_agent_states_transpose = torch.transpose(all_agents_states, 0, 1)
-            all_actions_local = []
-            for k in range(self.num_agents):
-                actions_local = self.agents[k].actor_local(all_agent_states_transpose[k])
-                all_actions_local.append(actions_local)
-            all_actions_local = torch.cat(all_actions_local, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
-            # todo critic works wiht all obs
-            # + comment maddpg implementation todo
-            #actor_loss = -self.agents[i].critic_local(all_agents_states[i], actions_local).mean()
-            actor_loss = -self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), all_actions_local).mean()
-            self.agents[i].actor_local_optimizer.zero_grad()
-            actor_loss.backward()
-            self.agents[i].actor_local_optimizer.step()
-            self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
+                # actor
+                all_agent_states_transpose = torch.transpose(all_agents_states, 0, 1)
+                all_actions_local = []
+                for k in range(self.num_agents):
+                    actions_local = self.agents[k].actor_local(all_agent_states_transpose[k])
+                    all_actions_local.append(actions_local)
+                all_actions_local = torch.cat(all_actions_local, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
+                # todo critic works wiht all obs
+                # + comment maddpg implementation todo
+                #actor_loss = -self.agents[i].critic_local(all_agents_states[i], actions_local).mean()
+                actor_loss = -self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), all_actions_local).mean()
+                self.agents[i].actor_local_optimizer.zero_grad()
+                actor_loss.backward()
+                self.agents[i].actor_local_optimizer.step()
+                self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
 
     def _sample_from_buffer(self):
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
