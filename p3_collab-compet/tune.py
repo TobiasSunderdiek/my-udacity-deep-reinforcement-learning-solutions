@@ -11,22 +11,23 @@ class Trainable(tune.Trainable):
 
     def step(self):
         self.env = UnityEnvironment(file_name=self.env_filename)
-        episode_reward_mean = self.collab_competition.train(self.env)
-        env.close()
-        return {'episode_reward_mean': episode_reward_mean}#todo acutal not episode but all-episodes reward mean
+        episode_reward_mean, count_rewards = self.collab_competition.train(self.env)
+        self.env.close()
+        return {'episode_reward_mean': count_rewards}# todd chagne to rewards #todo acutal not episode but all-episodes reward mean
+        #return {'episode_reward_mean': episode_reward_mean}# todd chagne to rewards #todo acutal not episode but all-episodes reward mean
 
 hyperparameter = {'gamma': 0.99,
-                'sample_batch_size': tune.grid_search([128]),
+                'sample_batch_size': tune.grid_search([512]),
                 # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
                 # otherwise index error due to float
                 'replay_buffer_size': tune.grid_search([int(1e6)]),#todo asha
-                'tau': tune.grid_search([0.01, 0.1]),
-                'actor_learning_rate': tune.grid_search([0.001, 0.01]),
-                'critic_learning_rate': tune.grid_search([0.001, 0.01]),
-                'update_every': tune.grid_search([5, 20]),
-                'init_weights_variance': tune.grid_search([0.005, 0.05, 0.2, 0.5, 0.8, 1.0]),
-                'hidden_layer_1': tune.grid_search([100, 50]),
-                'hidden_layer_2': tune.grid_search([25, 10]),
+                'tau': tune.grid_search([0.1]),
+                'actor_learning_rate': tune.grid_search([0.001]),
+                'critic_learning_rate': tune.grid_search([0.001]),
+                'update_every': tune.grid_search([5]),
+                'init_weights_variance': tune.grid_search([0.03, 0.05, 0.08]),
+                'hidden_layer_1': tune.grid_search([400]),
+                'hidden_layer_2': tune.grid_search([300]),
                 'sigma': tune.grid_search([0.2, 1.0, 2.0]),
                 'theta': tune.grid_search([0.15, 1.0])
             }
@@ -37,5 +38,5 @@ tune.run(
     num_samples=1,
     local_dir='./runs',
     verbose=1,
-    resources_per_trial={"cpu": 1, "gpu": 0}#todo
+    resources_per_trial={"cpu": 3, "gpu": 0}#todo
 )
