@@ -30,6 +30,8 @@ class CollaborationAndCompetition:
 
     def train(self, env):
         brain_name = env.brain_names[0]
+        #todo remove
+        count_rewards = 0
         for episode in range(1, self.episodes+1):
             all_agents_states = env.reset(train_mode=True)[brain_name].vector_observations
             all_agents_score = np.zeros(self.num_agents)
@@ -40,17 +42,25 @@ class CollaborationAndCompetition:
                 current_epsilon = self.epsilon.calculate_for(timestep)
                 all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
                 all_agents_actions = np.asarray(all_agents_actions)
-                '''#todo remove
-                all_agents_actions = np.random.randn(self.num_agents, 2) # select an action (for each agent)
-                all_agents_actions = np.clip(all_agents_actions, -1, 1)
-                print('rand')
-                print(all_agents_actions)'''
+                #print("my")
+                #print(all_agents_actions)
+                #todo remove
+                #if(count_rewards < 1024):
+                #    all_agents_actions = np.random.randn(self.num_agents, 2) # select an action (for each agent)
+                #    all_agents_actions = np.clip(all_agents_actions, -1, 1)
+                #print('rand')
+                #print(all_agents_actions)
                 
                 
 
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
-                self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+                #todo only add if reward positive
+                if(sum(all_agents_rewards) > 0):
+                    count_rewards += 1
+                    print(f"count_rewards {count_rewards}")
+                    self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+                #todo moved to if clause aboveself.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 self.agents.learn(timestep)
                 all_agents_score += all_agents_rewards
                 #print(f'all_agents_rewards {all_agents_rewards}')
@@ -64,7 +74,7 @@ class CollaborationAndCompetition:
                 print(f'max_score {max_score}')
             self.scores.append(max_score)
             mean_score = np.mean(self.scores)
-            if (episode % 10 == 0):
+            if (episode % 100 == 0):
                 print(f'Episode {episode} mean score {mean_score}')
             if (len(self.scores) == 100 and mean_score >= 0.5):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
@@ -81,16 +91,16 @@ class CollaborationAndCompetition:
 if __name__ == '__main__':
     #todo this are the params from the paper
     # https://arxiv.org/pdf/1706.02275.pdf
-    hyperparameter = {'gamma': 0.99,
-                      'sample_batch_size': 128,
+    hyperparameter = {'gamma': 0.95,
+                      'sample_batch_size': 512,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
                       # otherwise index error due to float
-                      'replay_buffer_size': int(1e5),
-                      'tau': 1e-3,
-                      'actor_learning_rate': 1e-5,
-                      'critic_learning_rate': 1e-4,
-                      'update_every': 1,
-                      'init_weights_variance': 0.2,
+                      'replay_buffer_size': int(1e6),
+                      'tau': 0.1,
+                      'actor_learning_rate': 0.001,
+                      'critic_learning_rate': 0.001,
+                      'update_every': 10,
+                      'init_weights_variance': 1.0,
                       'hidden_layer_1': 400,
                       'hidden_layer_2': 300,
                       'sigma': 0.2,
