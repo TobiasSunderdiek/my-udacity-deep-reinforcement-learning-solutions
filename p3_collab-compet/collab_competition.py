@@ -23,7 +23,7 @@ class CollaborationAndCompetition:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 50
+        self.episodes = 6_000
         self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -40,15 +40,13 @@ class CollaborationAndCompetition:
                 current_epsilon = self.epsilon.calculate_for(timestep)
                 all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
                 all_agents_actions = np.asarray(all_agents_actions)
-                '''
-                print('my')
-                print(all_agents_actions)
-                #todo remove
+                '''#todo remove
                 all_agents_actions = np.random.randn(self.num_agents, 2) # select an action (for each agent)
                 all_agents_actions = np.clip(all_agents_actions, -1, 1)
                 print('rand')
-                print(all_agents_actions)
-                '''
+                print(all_agents_actions)'''
+                
+                
 
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
@@ -66,7 +64,7 @@ class CollaborationAndCompetition:
                 print(f'max_score {max_score}')
             self.scores.append(max_score)
             mean_score = np.mean(self.scores)
-            if (episode % 100 == 0):
+            if (episode % 10 == 0):
                 print(f'Episode {episode} mean score {mean_score}')
             if (len(self.scores) == 100 and mean_score >= 0.5):
                 print(f'Reached mean score of {mean_score} over last 100 episodes after episode {episode}')
@@ -83,17 +81,17 @@ class CollaborationAndCompetition:
 if __name__ == '__main__':
     #todo this are the params from the paper
     # https://arxiv.org/pdf/1706.02275.pdf
-    hyperparameter = {'gamma': 0.95,
-                      'sample_batch_size': 1024,
+    hyperparameter = {'gamma': 0.99,
+                      'sample_batch_size': 128,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
                       # otherwise index error due to float
-                      'replay_buffer_size': int(1e6),
-                      'tau': 0.01,
-                      'actor_learning_rate': 0.01,
-                      'critic_learning_rate': 0.01,
-                      'update_every': 100,
+                      'replay_buffer_size': int(1e5),
+                      'tau': 1e-3,
+                      'actor_learning_rate': 1e-5,
+                      'critic_learning_rate': 1e-4,
+                      'update_every': 1,
                       'init_weights_variance': 0.2,
-                      'hidden_layer_1': 300,
+                      'hidden_layer_1': 400,
                       'hidden_layer_2': 300,
                       'sigma': 0.2,
                       'theta': 0.15

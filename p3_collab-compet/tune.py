@@ -7,15 +7,13 @@ class Trainable(tune.Trainable):
     def setup(self, hyperparameter):
         self.env_filename = self.logdir + '../../../Tennis.app'
         #self.env_filename = '/data/Tennis_Linux_NoVis/Tennis'
-        self.env = UnityEnvironment(file_name=self.env_filename)
         self.collab_competition = CollaborationAndCompetition(hyperparameter)
 
     def step(self):
+        self.env = UnityEnvironment(file_name=self.env_filename)
         episode_reward_mean = self.collab_competition.train(self.env)
-        #env.close()
+        env.close()
         return {'episode_reward_mean': episode_reward_mean}#todo acutal not episode but all-episodes reward mean
-    #def cleanup(self):
-    #    self.env.close()
 
 hyperparameter = {'gamma': 0.99,
                 'sample_batch_size': tune.grid_search([128]),
@@ -30,7 +28,7 @@ hyperparameter = {'gamma': 0.99,
                 'hidden_layer_1': tune.grid_search([100, 50]),
                 'hidden_layer_2': tune.grid_search([25, 10]),
                 'sigma': tune.grid_search([0.2, 1.0, 2.0]),
-                'theta': 0.15
+                'theta': tune.grid_search([0.15, 1.0])
             }
 
 tune.run(
@@ -39,5 +37,5 @@ tune.run(
     num_samples=1,
     local_dir='./runs',
     verbose=1,
-    resources_per_trial={"cpu": 3, "gpu": 0}#todo
+    resources_per_trial={"cpu": 1, "gpu": 0}#todo
 )

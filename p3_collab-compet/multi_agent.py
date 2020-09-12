@@ -18,7 +18,6 @@ class MultiAgent:
 
     def reset_noise(self):
         for i in range(self.num_agents):
-            print(i)
             # reset noise
             # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
             self.agents[i].reset_noise
@@ -27,6 +26,18 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
+        '''print("len")
+        print(f'all_agents_states {len(all_agents_states)}')
+        print(f'all_agents_actions {len(all_agents_actions)}')
+        print(f'all_agents_rewards {len(all_agents_rewards)}')
+        print(f'all_agents_next_states {len(all_agents_next_states)}')
+        print(f'all_agents_dones {len(all_agents_dones)}')
+        print("[0]")
+        print(f'all_agents_states {all_agents_states[0]}')
+        print(f'all_agents_actions {all_agents_actions[0]}')
+        print(f'all_agents_rewards {all_agents_rewards[0]}')
+        print(f'all_agents_next_states {all_agents_next_states[0]}')
+        print(f'all_agents_dones {all_agents_dones[0]}')'''
         self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
@@ -42,6 +53,9 @@ class MultiAgent:
                 #todo q value works with all obs, not single agent
                 # + comment got it from lab maddpg implementation #todo
                 #local_q_values = self.agents[i].critic_local(all_agents_states[i], all_agents_actions[i]) #todo
+                '''print('input local_q_values')
+                print(f'before {len(all_agents_states)}')
+                print(f'after {torch.reshape(all_agents_states, (self.sample_batch_size, 48)).shape}')'''
                 local_q_values = self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), torch.reshape(all_agents_actions, (self.sample_batch_size, 4))) #todo/change insert full batch and reshape
                 #next_actions = self.agents[i].actor_target(all_agents_next_states[i]) all_agents_next_actions
                 all_agents_next_states_tranpose =  torch.transpose(all_agents_next_states, 0, 1)#[128, 2, 24] -> [2, 128, 24]
@@ -49,8 +63,18 @@ class MultiAgent:
                 for j in range(self.num_agents):
                     next_states_agent_j = all_agents_next_states_tranpose[j]
                     agent_j_action = self.agents[j].actor_target(next_states_agent_j)
+                    #print(f'agent_j_action {agent_j_action.shape}') #1024, 2
                     all_agents_next_actions.append(agent_j_action)
-                all_agents_next_actions = torch.cat(all_agents_next_actions, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
+                '''
+                print(f'all_agents_actions {len(all_agents_actions)}') #1024
+                print(f'all_agents_actions {all_agents_actions.shape}') #1024,2,2
+                print(f'all_agents_actions len of 0th {len(all_agents_actions[0])}') #2 -> 1024x2
+                print(f'all_agents_actions reshaped for critic_local {torch.reshape(all_agents_actions, (self.sample_batch_size, 4)).shape}') #1024,4
+                print(f'all_agents_next_actions {len(all_agents_next_actions)}') #2
+                print(f'all_agents_next_actions len of 0th {len(all_agents_next_actions[0])}') #1024 -> 2x1024
+                '''
+                all_agents_next_actions = torch.cat(all_agents_next_actions, 1) #das stimmt nicht?: 128,2 und 128,2 (jeweils 1 Agent) -> 128,4
+                #print(f'all agents next actions resphaped for critic target {all_agents_next_actions.shape}')
                 #all_agents_next_actions = self.agents[i].actor_target(all_agents_next_states) #todo for every agent i and sum?
                 rewards_transpose = torch.transpose(all_agents_rewards, 0, 1) #(128,2,1) -> (2,128,1)
                 reward_of_i = rewards_transpose[i]

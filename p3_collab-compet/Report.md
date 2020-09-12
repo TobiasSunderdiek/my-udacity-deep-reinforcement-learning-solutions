@@ -22,6 +22,9 @@ to track motion
 
 - new hyperparameter init_weights_variance, hidden_layer_1, hidden_layer_2, sigma, theta
 
+HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
+HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters
+
 I have choosen a DDPG [2] to solve this environment. The DDPG consists of a total of 4 neural networks, divided into Actor (local version and target version) and Critic (local version and target version). The Actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward. This is not a stochastic output from which the action is choosen like in PPO. To enable exploration, a noise is added to every predicted action. The critic predicts the best Q-Value for a state, as in DQN, but with the speciality that the action is added to the observation input. Both of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep.
 
  I used the Ornstein-Uhlenbeck implementation from OpenAI-Baselines[5].
