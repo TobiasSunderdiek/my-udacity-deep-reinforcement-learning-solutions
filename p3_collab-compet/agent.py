@@ -28,7 +28,7 @@ class Agent:
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'], weight_decay=0.0001)
         # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=1.0, theta=0.15)
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.9, theta=0.15)
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
         self.update_every = hyperparameter['update_every']
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64

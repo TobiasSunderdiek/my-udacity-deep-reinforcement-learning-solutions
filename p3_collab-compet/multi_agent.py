@@ -66,7 +66,7 @@ class MultiAgent:
                 torch.nn.utils.clip_grad_norm_(self.agents[i].critic_local.parameters(), 1)
                 self.agents[i].critic_local_optimizer.step()
                 self.agents[i].critic_local.eval()
-                self.agents[i].soft_update(self.agents[i].critic_target, self.agents[i].critic_local, timestep)
+                #self.agents[i].soft_update(self.agents[i].critic_target, self.agents[i].critic_local, timestep)
 
                 # actor
                 all_agent_states_transpose = torch.transpose(all_agents_states, 0, 1)
@@ -82,7 +82,10 @@ class MultiAgent:
                 self.agents[i].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[i].actor_local_optimizer.step()
-                self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
+                #self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
+            for l in range(self.num_agents): #todo moved at end like in paper
+                self.agents[l].soft_update(self.agents[l].critic_target, self.agents[l].critic_local, timestep)
+                self.agents[l].soft_update(self.agents[l].actor_target, self.agents[l].actor_local, timestep)
 
     def _sample_from_buffer(self):
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)

@@ -23,7 +23,7 @@ class CollaborationAndCompetition:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
-        self.episodes = 1_000
+        self.episodes = 50
         self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -92,9 +92,11 @@ if __name__ == '__main__':
                       'actor_learning_rate': 0.01,
                       'critic_learning_rate': 0.01,
                       'update_every': 100,
-                      'init_weights_variance': 0.8,
+                      'init_weights_variance': 0.2,
                       'hidden_layer_1': 300,
-                      'hidden_layer_2': 300
+                      'hidden_layer_2': 300,
+                      'sigma': 0.2,
+                      'theta': 0.15
                     }
     env_filename = 'Tennis.app'
     env = UnityEnvironment(file_name=env_filename)
