@@ -92,8 +92,8 @@ if __name__ == '__main__':
                       'critic_learning_rate': 1e-3,
                       'update_every': 5,
                       'init_weights_variance': 0.03,
-                      'hidden_layer_1': 400,
-                      'hidden_layer_2': 300,
+                      'hidden_layer_1': 200,
+                      'hidden_layer_2': 150,
                       'sigma': 0.2,
                       'theta': 0.15
                     }
