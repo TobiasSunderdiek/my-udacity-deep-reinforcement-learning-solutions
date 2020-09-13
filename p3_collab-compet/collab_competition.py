@@ -10,7 +10,7 @@ import numpy as np
 from collections import deque
 from torch.utils.tensorboard import SummaryWriter
 
-from multi_agent import MultiAgent
+from MADDPG import MultiAgent
 from epsilon import Epsilon
 import torch #todo only for testing
 
@@ -24,7 +24,8 @@ class CollaborationAndCompetition:
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
         self.episodes = 5_000
-        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
+        seed = 0
+        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents, seed)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
@@ -34,12 +35,13 @@ class CollaborationAndCompetition:
             all_agents_states = env.reset(train_mode=True)[brain_name].vector_observations
             all_agents_score = np.zeros(self.num_agents)
             timestep = 0
-            self.agents.reset_noise
+            self.agents.reset()
 
             while True:
                 current_epsilon = self.epsilon.calculate_for(timestep)
                 all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
-                all_agents_actions = np.asarray(all_agents_actions)
+                #print(all_agents_actions)
+                #all_agents_actions = np.asarray(all_agents_actions)
                 #print("my")
                 #print(all_agents_actions)
                 #todo remove
@@ -53,8 +55,8 @@ class CollaborationAndCompetition:
 
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
-                self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
-                self.agents.learn(timestep)
+                self.agents.step(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+                #self.agents.learn(timestep)
                 all_agents_score += all_agents_rewards
                 #print(f'all_agents_rewards {all_agents_rewards}')
                 #print(f'all_agents_score {all_agents_score}')
@@ -91,12 +93,13 @@ if __name__ == '__main__':
                       'actor_learning_rate': 1e-4,
                       'critic_learning_rate': 1e-3,
                       'update_every': 5,
-                      'init_weights_variance': 0.03,
+                      'init_weights_variance': 3e-3,
                       'hidden_layer_1': 200,
                       'hidden_layer_2': 150,
                       'sigma': 0.2,
-                      'theta': 0.15
+                      'theta': 0.15,
                     }
+
     env_filename = 'Tennis.app'
     env = UnityEnvironment(file_name=env_filename)
     CollaborationAndCompetition(hyperparameter).train(env)
