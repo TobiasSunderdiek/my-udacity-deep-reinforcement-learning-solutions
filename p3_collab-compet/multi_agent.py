@@ -68,21 +68,19 @@ class MultiAgent:
                 critic_loss.backward()
                 self.agents[num_agent].critic_local_optimizer.step()
 
-                # ---------------------------- update actor ---------------------------- #
-                # Compute actor loss
-                # take the current states and predict actions
-                actions_pred = [self.agents[num_agent].actor_local(s) for s in states]        
-                actions_pred_ = torch.cat(actions_pred, dim=1).to(self.device)
-                # -1 * (maximize) Q value for the current prediction
-                actor_loss = -self.agents[num_agent].critic_local(x, actions_pred_).mean()        
-                # Minimize the loss
-                self.agents[num_agent].actor_local_optimizer.zero_grad()
-                actor_loss.backward()        
-                self.agents[num_agent].actor_local_optimizer.step()
 
-                # ----------------------- update target networks ----------------------- #
-                self.agents[num_agent].soft_update(self.agents[num_agent].critic_local, self.agents[num_agent].critic_target, self.hyperparameter['tau'])
-                self.agents[num_agent].soft_update(self.agents[num_agent].actor_local, self.agents[num_agent].actor_target, self.hyperparameter['tau']) 
+                #my:
+                
+                #actor
+                # Achtung jedne State einzeln: 
+                actions_local = [self.agents[num_agent].actor_local(state) for state in states]
+                actions_local = torch.cat(actions_local, 1)
+                actor_loss = -self.agents[num_agent].critic_local(x, actions_local).mean()
+                self.agents[num_agent].actor_local_optimizer.zero_grad()
+                actor_loss.backward()
+                self.agents[num_agent].actor_local_optimizer.step()
+                self.agents[num_agent].soft_update(self.agents[num_agent].critic_target, self.agents[num_agent].critic_local, timestep)
+                self.agents[num_agent].soft_update(self.agents[num_agent].actor_target, self.agents[num_agent].actor_local, timestep)
                 '''
                 self.agents[i].critic_local.train()
                 #todo q value works with all obs, not single agent
@@ -104,7 +102,6 @@ class MultiAgent:
                 reward_of_i = rewards_transpose[i]
                 all_agents_dones_transpose = torch.transpose(all_agents_dones, 0, 1) #128,2,1 -> 2,128,1
                 all_agents_dones_of_i = all_agents_dones_transpose[i]
-                #target_q_values = all_agents_rewards[i] + (self.gamma * self.agents[i].critic_target(all_agents_next_states[i], next_actions) * (1 - all_agents_dones[i])) #todo
                 target_q_values = reward_of_i + (self.gamma * self.agents[i].critic_target(torch.reshape(all_agents_next_states, (self.sample_batch_size, 48)), all_agents_next_actions) * (1 - all_agents_dones_of_i)) #todo/change insert full batch, add all_agents_next_actions, add reward_of_i agent
                 critic_loss = F.mse_loss(local_q_values, target_q_values)#todo huber loss
                 self.agents[i].critic_local_optimizer.zero_grad()
@@ -114,27 +111,9 @@ class MultiAgent:
                 torch.nn.utils.clip_grad_norm_(self.agents[i].critic_local.parameters(), 1)
                 self.agents[i].critic_local_optimizer.step()
                 self.agents[i].critic_local.eval()
-                #self.agents[i].soft_update(self.agents[i].critic_target, self.agents[i].critic_local, timestep)
 
-                # actor
-                all_agent_states_transpose = torch.transpose(all_agents_states, 0, 1)
-                all_actions_local = []
-                for k in range(self.num_agents):
-                    actions_local = self.agents[k].actor_local(all_agent_states_transpose[k])
-                    all_actions_local.append(actions_local)
-                all_actions_local = torch.cat(all_actions_local, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
-                # todo critic works wiht all obs
-                # + comment maddpg implementation todo
-                #actor_loss = -self.agents[i].critic_local(all_agents_states[i], actions_local).mean()
-                actor_loss = -self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), all_actions_local).mean()
-                self.agents[i].actor_local_optimizer.zero_grad()
-                actor_loss.backward()
-                self.agents[i].actor_local_optimizer.step()
-                self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
                 '''
-            #for l in range(self.num_agents): #todo moved at end like in paper
-            #    self.agents[l].soft_update(self.agents[l].critic_target, self.agents[l].critic_local, timestep)
-            #    self.agents[l].soft_update(self.agents[l].actor_target, self.agents[l].actor_local, timestep)
+           
 
     def _sample_from_buffer(self):
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.hyperparameter['sample_batch_size'])

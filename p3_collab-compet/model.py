@@ -1,29 +1,27 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
-
-# Calculate the range of values for uniform distributions
 def hidden_init(layer):
     fan_in = layer.weight.data.size()[0]
     lim = 1. / np.sqrt(fan_in)
     return (-lim, lim)
 
-actor_net = {'fc1_units': 200, 'fc2_units': 150}
-critic_net = {'fc1_units': 200, 'fc2_units': 150}
-
 class Actor(nn.Module):
-    """Actor (Policy) Model."""
-
-    def __init__(self, input_size, action_size, seed, 
-                 fc1_units = actor_net['fc1_units'], 
-                 fc2_units = actor_net['fc2_units']):  
+    """ I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
+        and from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L12
+    """
+    def __init__(self, input_size, action_size, hyperparameter, seed):
         super().__init__()
+        # I got using a seed from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L26
+        # and added it as I did not use a seed in my implementation
+        #todo # Changes from udacity code review: In my first implementation I assigned the seed to a class variable(but never used it) and the
+        # udacity code review suggests me to remove this class variable as I do not need it in my implementation
         torch.manual_seed(seed)
-        self.fc_1 = nn.Linear(input_size, 200)
-        self.fc_2 = nn.Linear(200, 150)
-        self.fc_3 = nn.Linear(150, action_size)
+        self.fc_1 = nn.Linear(input_size, hyperparameter['hidden_layer_1'])
+        self.fc_2 = nn.Linear(hyperparameter['hidden_layer_1'], hyperparameter['hidden_layer_2'])
+        self.fc_3 = nn.Linear(hyperparameter['hidden_layer_2'], action_size)
         #todo
         #nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3)
         #nn.init.uniform_(self.fc_3.bias, -3*10e-3, 3*10e-3)
@@ -34,7 +32,7 @@ class Actor(nn.Module):
         # so change to normal distribution
         self.fc_1.weight.data.uniform_(*hidden_init(self.fc_1))
         self.fc_2.weight.data.uniform_(*hidden_init(self.fc_2))
-        nn.init.uniform_(self.fc_3.weight, -3e-3, 3e-3)
+        nn.init.uniform_(self.fc_3.weight, -hyperparameter['init_weights_variance'], hyperparameter['init_weights_variance'])
         #nn.init.normal_(self.fc_3.bias, 0.0, 0.8)
 
     def forward(self, input):
@@ -45,23 +43,26 @@ class Actor(nn.Module):
         return x
 
 class Critic(nn.Module):
-    """Critic (Value) Model."""
-
-    def __init__(self, input_size, action_size, seed,
-                 fc1_units=critic_net['fc1_units'],
-                 fc2_units=critic_net['fc2_units']): 
+    """ I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
+        and copied it from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L44
+    """
+    def __init__(self, input_size, action_size, hyperparameter, seed):
         super().__init__()
+        # I got using a seed from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L58
+        # and added it as I did not use a seed in my implementation
+        #todo # Changes from udacity code review: In my first implementation I assigned the seed to a class variable(but never used it) and the
+        # udacity code review suggests me to remove this class variable as I do not need it in my implementation
         torch.manual_seed(seed)
-        self.fc_1 = nn.Linear(input_size*2+action_size*2, 200)
-        self.fc_2 = nn.Linear(200, 150)
-        self.fc_3 = nn.Linear(150, 1) #todo understand why map to 1
+        self.fc_1 = nn.Linear(input_size+action_size, hyperparameter['hidden_layer_1'])
+        self.fc_2 = nn.Linear(hyperparameter['hidden_layer_1'], hyperparameter['hidden_layer_2'])
+        self.fc_3 = nn.Linear(hyperparameter['hidden_layer_2'], 1) #todo understand why map to 1
         #todo 
         #nn.init.uniform_(self.fc_3.weight, -3*10e-3, 3*10e-3)
         #nn.init.uniform_(self.fc_3.bias, -3*10e-3, 3*10e-3)
         #nn.init.normal_(self.fc_3.weight, 0.0, init_weights_variance)
         self.fc_1.weight.data.uniform_(*hidden_init(self.fc_1))
         self.fc_2.weight.data.uniform_(*hidden_init(self.fc_2))
-        nn.init.uniform_(self.fc_3.weight, -3e-3, 3e-3)
+        nn.init.uniform_(self.fc_3.weight, -hyperparameter['init_weights_variance'], hyperparameter['init_weights_variance'])
 
     def forward(self, input, action):
         x = torch.cat((input, action), dim=1)

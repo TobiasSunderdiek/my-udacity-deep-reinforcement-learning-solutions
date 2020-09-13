@@ -24,6 +24,14 @@ to track motion
 - I used seed=2, change to seed=0
 - I did not use a new sample for every agent?!
 - I added epsilon to the noise before, here without
+- need to remove __pycache__/ every run?
+- depends on init vars, every run is different?
+- do soft update at every agents loop, I had it after the agents loop before
+- in model: +actions size moved to input layer, dont know why my version not works
+- in model: lim = 1. / np.sqrt(fan_in) for init other layers
+- in model: use relu instead of leaky_relu
+- in my learn: actor: I did actor_local(all_states) for ALL agents and summed the result up: correct: only for the agent in the loop
+- AND not (all_states), but for every single state one call, array result up
 
 HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
 HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters

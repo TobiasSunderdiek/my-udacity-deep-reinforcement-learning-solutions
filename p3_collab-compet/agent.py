@@ -12,13 +12,13 @@ class Agent:
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
         # and https://pytorch.org/docs/stable/notes/cuda.html#best-practices
         # I added it here
-        self.device = torch.device('cpu')#torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
         # I added it here
-        self.actor_local = Actor(observation_state_size, action_space_size, seed).to(self.device)
-        self.actor_target = Actor(observation_state_size, action_space_size, seed).to(self.device)
-        self.critic_local = Critic(observation_state_size, action_space_size, seed).to(self.device)#todo *2 is num_agents, add dynamically
-        self.critic_target = Critic(observation_state_size, action_space_size, seed).to(self.device)#todo *2 is num_agents, add dynamically
+        self.actor_local = Actor(observation_state_size, action_space_size, hyperparameter, seed).to(self.device)
+        self.actor_target = Actor(observation_state_size, action_space_size, hyperparameter, seed).to(self.device)
+        self.critic_local = Critic(observation_state_size*2, action_space_size*2, hyperparameter, seed).to(self.device)#todo *2 is num_agents, add dynamically
+        self.critic_target = Critic(observation_state_size*2, action_space_size*2, hyperparameter, seed).to(self.device)#todo *2 is num_agents, add dynamically
         self.tau = hyperparameter['tau']
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), hyperparameter['actor_learning_rate'])
         # I got how to add weight decay like described in the paper

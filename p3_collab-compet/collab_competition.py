@@ -86,8 +86,6 @@ class CollaborationAndCompetition:
         return max_score
 
 if __name__ == '__main__':
-    #todo this are the params from the paper
-    # https://arxiv.org/pdf/1706.02275.pdf
     hyperparameter = {'gamma': 0.99,
                       'sample_batch_size': 250,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
