@@ -55,8 +55,12 @@ class CollaborationAndCompetition:
 
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
-                self.agents.step(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
-                #self.agents.learn(timestep)
+                
+                self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+                self.agents.learn(timestep)
+
+                
+                #neu self.agents.step(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 all_agents_score += all_agents_rewards
                 #print(f'all_agents_rewards {all_agents_rewards}')
                 #print(f'all_agents_score {all_agents_score}')

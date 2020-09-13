@@ -241,7 +241,11 @@ class MultiAgent:
         
         #e = self.experience(x, action, reward, next_x, done)
         replay_buffer.add(x, action, reward, next_x, done)
-
+    
+    def learn(self, timestep):
+        for num_agent, agent in enumerate(self.agents):
+            agent.step(num_agent)
+    '''
     def step(self, x, actions, rewards, next_x, dones):
         """Save experiences in replay replay_buffer and learn."""
         # Save experience in replay replay_buffer
@@ -249,6 +253,7 @@ class MultiAgent:
         
         for num_agent, agent in enumerate(self.agents):
             agent.step(num_agent)
+    '''
 
     def select_actions(self, states, epsilon):
         """Agents perform actions according to their policy."""
