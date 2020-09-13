@@ -6,17 +6,18 @@ from baselines.deepq.replay_buffer import ReplayBuffer
 from agent import Agent
 
 class MultiAgent:
-    def __init__(self, observation_state_size, action_state_size, hyperparameter, num_agents):
+    def __init__(self, observation_state_size, action_state_size, hyperparameter, num_agents, seed):
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.num_agents = num_agents
         # I got using single param for all hyperparameters from udacity code review for my previous project
-        self.agents = [Agent(observation_state_size, action_state_size, hyperparameter) for i in range(num_agents)]
+        self.agents = [Agent(observation_state_size, action_state_size, hyperparameter, seed) for i in range(num_agents)]
         self.sample_batch_size = hyperparameter['sample_batch_size']
         self.replay_buffer_size = hyperparameter['replay_buffer_size']
         self.replay_buffer = ReplayBuffer(self.replay_buffer_size)
         self.gamma = hyperparameter['gamma']
+        self.hyperparameter = hyperparameter
 
-    def reset_noise(self):
+    def reset(self):
         for i in range(self.num_agents):
             # reset noise
             # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
@@ -26,19 +27,13 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
-        '''print("len")
-        print(f'all_agents_states {len(all_agents_states)}')
-        print(f'all_agents_actions {len(all_agents_actions)}')
-        print(f'all_agents_rewards {len(all_agents_rewards)}')
-        print(f'all_agents_next_states {len(all_agents_next_states)}')
-        print(f'all_agents_dones {len(all_agents_dones)}')
-        print("[0]")
-        print(f'all_agents_states {all_agents_states[0]}')
-        print(f'all_agents_actions {all_agents_actions[0]}')
-        print(f'all_agents_rewards {all_agents_rewards[0]}')
-        print(f'all_agents_next_states {all_agents_next_states[0]}')
-        print(f'all_agents_dones {all_agents_dones[0]}')'''
-        self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+        x = np.concatenate(all_agents_states, axis=0)
+        next_x = np.concatenate(all_agents_next_states, axis=0)
+        action = np.concatenate(all_agents_actions, axis=0)
+        #achtung done, reward wird hier nicht concated, weil sonst error
+        
+        #e = self.experience(x, action, reward, next_x, done)
+        self.replay_buffer.add(x, action, all_agents_rewards, next_x, all_agents_dones)        
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
     # and adjusted it for the multi agent part
@@ -46,16 +41,53 @@ class MultiAgent:
         # only learn if enough data available
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.sample_batch_size):
-            all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones = self._sample_from_buffer()
             # critic
-            for i in range(self.num_agents):
+            for num_agent in range(self.num_agents):
+                x, actions, rewards, next_x, dones = self._sample_from_buffer()
+                # Splits 'x' into a 'num_agents' of states
+                states = torch.chunk(x, 2, dim = 1)
+                # Splits 'next_x' into a 'num_agents' of next states
+                next_states = torch.chunk(next_x, 2, dim = 1)
+                
+                # Get reward for each agent
+                rewards = rewards[:,num_agent].reshape(rewards.shape[0],1)
+                dones = dones[:,num_agent].reshape(dones.shape[0],1)
+                
+                # ---------------------------- update critic ---------------------------- #
+                # Get predicted next-state actions and Q values from target models
+                next_actions = [self.agents[num_agent].actor_target(n_s) for n_s in next_states]
+                target_actions = torch.cat(next_actions, dim=1).to(self.device)  
+                Q_targets_next = self.agents[num_agent].critic_target(next_x, target_actions)        
+                # Compute Q targets for current states (y_i)
+                Q_targets = rewards + (self.gamma * Q_targets_next * (1 - dones))        
+                # Compute critic loss
+                Q_expected = self.agents[num_agent].critic_local(x, actions)
+                critic_loss = F.mse_loss(Q_expected, Q_targets)        
+                # Minimize the loss
+                self.agents[num_agent].critic_local_optimizer.zero_grad()
+                critic_loss.backward()
+                self.agents[num_agent].critic_local_optimizer.step()
+
+                # ---------------------------- update actor ---------------------------- #
+                # Compute actor loss
+                # take the current states and predict actions
+                actions_pred = [self.agents[num_agent].actor_local(s) for s in states]        
+                actions_pred_ = torch.cat(actions_pred, dim=1).to(self.device)
+                # -1 * (maximize) Q value for the current prediction
+                actor_loss = -self.agents[num_agent].critic_local(x, actions_pred_).mean()        
+                # Minimize the loss
+                self.agents[num_agent].actor_local_optimizer.zero_grad()
+                actor_loss.backward()        
+                self.agents[num_agent].actor_local_optimizer.step()
+
+                # ----------------------- update target networks ----------------------- #
+                self.agents[num_agent].soft_update(self.agents[num_agent].critic_local, self.agents[num_agent].critic_target, self.hyperparameter['tau'])
+                self.agents[num_agent].soft_update(self.agents[num_agent].actor_local, self.agents[num_agent].actor_target, self.hyperparameter['tau']) 
+                '''
                 self.agents[i].critic_local.train()
                 #todo q value works with all obs, not single agent
                 # + comment got it from lab maddpg implementation #todo
                 #local_q_values = self.agents[i].critic_local(all_agents_states[i], all_agents_actions[i]) #todo
-                '''print('input local_q_values')
-                print(f'before {len(all_agents_states)}')
-                print(f'after {torch.reshape(all_agents_states, (self.sample_batch_size, 48)).shape}')'''
                 local_q_values = self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), torch.reshape(all_agents_actions, (self.sample_batch_size, 4))) #todo/change insert full batch and reshape
                 #next_actions = self.agents[i].actor_target(all_agents_next_states[i]) all_agents_next_actions
                 all_agents_next_states_tranpose =  torch.transpose(all_agents_next_states, 0, 1)#[128, 2, 24] -> [2, 128, 24]
@@ -65,14 +97,6 @@ class MultiAgent:
                     agent_j_action = self.agents[j].actor_target(next_states_agent_j)
                     #print(f'agent_j_action {agent_j_action.shape}') #1024, 2
                     all_agents_next_actions.append(agent_j_action)
-                '''
-                print(f'all_agents_actions {len(all_agents_actions)}') #1024
-                print(f'all_agents_actions {all_agents_actions.shape}') #1024,2,2
-                print(f'all_agents_actions len of 0th {len(all_agents_actions[0])}') #2 -> 1024x2
-                print(f'all_agents_actions reshaped for critic_local {torch.reshape(all_agents_actions, (self.sample_batch_size, 4)).shape}') #1024,4
-                print(f'all_agents_next_actions {len(all_agents_next_actions)}') #2
-                print(f'all_agents_next_actions len of 0th {len(all_agents_next_actions[0])}') #1024 -> 2x1024
-                '''
                 all_agents_next_actions = torch.cat(all_agents_next_actions, 1) #das stimmt nicht?: 128,2 und 128,2 (jeweils 1 Agent) -> 128,4
                 #print(f'all agents next actions resphaped for critic target {all_agents_next_actions.shape}')
                 #all_agents_next_actions = self.agents[i].actor_target(all_agents_next_states) #todo for every agent i and sum?
@@ -106,23 +130,24 @@ class MultiAgent:
                 self.agents[i].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[i].actor_local_optimizer.step()
-                #self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
-            for l in range(self.num_agents): #todo moved at end like in paper
-                self.agents[l].soft_update(self.agents[l].critic_target, self.agents[l].critic_local, timestep)
-                self.agents[l].soft_update(self.agents[l].actor_target, self.agents[l].actor_local, timestep)
+                self.agents[i].soft_update(self.agents[i].actor_target, self.agents[i].actor_local, timestep)
+                '''
+            #for l in range(self.num_agents): #todo moved at end like in paper
+            #    self.agents[l].soft_update(self.agents[l].critic_target, self.agents[l].critic_local, timestep)
+            #    self.agents[l].soft_update(self.agents[l].actor_target, self.agents[l].actor_local, timestep)
 
     def _sample_from_buffer(self):
-        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
-        # forgot to(device), after having a look at
-        # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L179
-        # I added it here
-        states = torch.FloatTensor(states).to(self.device)
-        actions = torch.FloatTensor(actions).to(self.device)
-        rewards = torch.FloatTensor(rewards).unsqueeze(-1).to(self.device)
-        next_states = torch.FloatTensor(next_states).to(self.device)
-        # dones: convert True/False to 0/1
-        dones = torch.FloatTensor(np.where(dones == True, 1, 0)).unsqueeze(-1).to(self.device)
-        return states, actions, rewards, next_states, dones
+        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.hyperparameter['sample_batch_size'])
+
+        # achtung umformung hierher verschoben funktioniert nicht
+        # achtung dones extra nicht)
+
+        x = torch.from_numpy(np.vstack(states)).float().to(self.device)
+        actions_o = torch.from_numpy(np.vstack(actions)).float().to(self.device)
+        rewards_o = torch.from_numpy(np.vstack(rewards)).float().to(self.device)
+        next_x = torch.from_numpy(np.vstack(next_states)).float().to(self.device)
+        dones_o = torch.from_numpy(np.vstack(dones).astype(np.uint8)).float().to(self.device)
+        return x, actions_o, rewards_o, next_x, dones_o 
 
     def save(self):
         data = {}

@@ -90,8 +90,8 @@ class Agent():
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.hyperparameter['critic_learning_rate'])
 
         # Noise process for action exploration
-        self.noise = OUNoise(action_size, self.seed)
-        #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.ones(action_size), sigma=OU_SIGMA, theta=OU_THETA)
+        #self.noise = OUNoise(action_size, self.seed)
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_size), sigma=self.hyperparameter['sigma'], theta=self.hyperparameter['theta'])
 
                  
     def step(self, num_agent):
@@ -121,7 +121,7 @@ class Agent():
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
         #print(f'action vorher {action}')
-        action += self.noise.sample()
+        action += self.noise()
         #tmp = self.noise() * epsilon
         #action += tmp
         #action += self.noise() * epsilon #todo

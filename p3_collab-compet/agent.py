@@ -6,7 +6,7 @@ from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 from model import Actor, Critic
 
 class Agent:
-    def __init__(self, observation_state_size, action_space_size, hyperparameter):
+    def __init__(self, observation_state_size, action_space_size, hyperparameter, seed):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
@@ -15,7 +15,6 @@ class Agent:
         self.device = torch.device('cpu')#torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
         # I added it here
-        seed = 2
         self.actor_local = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.actor_target = Actor(observation_state_size, action_space_size, seed).to(self.device)
         self.critic_local = Critic(observation_state_size, action_space_size, seed).to(self.device)#todo *2 is num_agents, add dynamically
@@ -28,11 +27,8 @@ class Agent:
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'], weight_decay=0.0001)
         # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=1.0, theta=0.15)
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.ones(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
         self.update_every = hyperparameter['update_every']
-        #todo i forgot...got from mappd lab
-        self.hard_update(self.critic_target, self.critic_local)
-        self.hard_update(self.actor_target, self.actor_local)
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state, epsilon):
@@ -45,7 +41,7 @@ class Agent:
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
         #print(f'action vorher {action}')
-        tmp = self.noise() * epsilon
+        tmp = self.noise()# * epsilon
         action += tmp
         #action += self.noise() * epsilon #todo
         #print(f'action nachher {action} mit noise {tmp}')
@@ -58,11 +54,5 @@ class Agent:
             for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
                 target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
     
-    # todo I forgot to hard update, got it from MADDPG-Lab implementation
-    def hard_update(self, target_network, local_network):
-        # as mentioned in the udacity benchmark project of the previous project 2 continuous control, update weights only every x-timesteps
-        for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
-            target_param.data.copy_(local_param.data)
-
     def reset_noise(self):
         self.noise.reset()

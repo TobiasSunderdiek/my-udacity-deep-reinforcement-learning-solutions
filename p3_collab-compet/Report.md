@@ -21,6 +21,9 @@ to track motion
 - therefore model of critic as input obs*num_agents and actions*num_agents
 
 - new hyperparameter init_weights_variance, hidden_layer_1, hidden_layer_2, sigma, theta
+- I used seed=2, change to seed=0
+- I did not use a new sample for every agent?!
+- I added epsilon to the noise before, here without
 
 HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
 HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters

@@ -10,7 +10,7 @@ import numpy as np
 from collections import deque
 from torch.utils.tensorboard import SummaryWriter
 
-from MADDPG import MultiAgent
+from multi_agent import MultiAgent
 from epsilon import Epsilon
 import torch #todo only for testing
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                       'tau': 1e-3,
                       'actor_learning_rate': 1e-4,
                       'critic_learning_rate': 1e-3,
-                      'update_every': 5,
+                      'update_every': 1,
                       'init_weights_variance': 3e-3,
                       'hidden_layer_1': 200,
                       'hidden_layer_2': 150,
