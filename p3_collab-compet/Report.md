@@ -32,6 +32,10 @@ to track motion
 - in model: use relu instead of leaky_relu
 - in my learn: actor: I did actor_local(all_states) for ALL agents and summed the result up: correct: only for the agent in the loop
 - AND not (all_states), but for every single state one call, array result up
+- use their replay buffer
+- user their noise
+- I used weight_decay=0.0001 for the critic, deleted
+- select_actions: I used to return an array, here return zeros
 
 HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
 HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters

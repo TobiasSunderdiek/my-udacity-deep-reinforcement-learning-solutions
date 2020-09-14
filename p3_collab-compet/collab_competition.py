@@ -60,7 +60,8 @@ class CollaborationAndCompetition:
                 self.agents.learn(timestep)
 
                 
-                #neu self.agents.step(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
+                #neu
+                #self.agents.step(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 all_agents_score += all_agents_rewards
                 #print(f'all_agents_rewards {all_agents_rewards}')
                 #print(f'all_agents_score {all_agents_score}')

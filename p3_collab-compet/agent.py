@@ -1,9 +1,39 @@
 import torch
 import torch.optim as optimizer
 import numpy as np
-from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 
 from model import Actor, Critic
+#from noise import OUNoise
+# I copied the class from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L132
+import numpy as np
+import random
+import copy
+
+OU_THETA = 0.15         # how "strongly" the system reacts to perturbations
+OU_SIGMA = 0.2
+
+class OUNoise:
+    """Ornstein-Uhlenbeck process."""
+
+    def __init__(self, size, seed, mu=0., theta=OU_THETA, sigma=OU_SIGMA):
+        """Initialize parameters and noise process."""
+        self.mu = mu * np.ones(size)
+        self.theta = theta
+        self.sigma = sigma
+        self.seed = np.random.seed(seed)
+        self.size = size
+        self.reset()  
+        
+    def reset(self):
+        """Reset the internal state (= noise) to mean (mu)."""
+        self.state = copy.copy(self.mu)
+
+    def sample(self):
+        """Update internal state and return it as a noise sample."""
+        x = self.state
+        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(self.size)
+        self.state = x + dx
+        return self.state 
 
 class Agent:
     def __init__(self, observation_state_size, action_space_size, hyperparameter, seed):
@@ -24,10 +54,11 @@ class Agent:
         # I got how to add weight decay like described in the paper
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
-        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'], weight_decay=0.0001)
+        self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
         # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=1.0, theta=0.15)
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
+        #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
+        self.noise = OUNoise(action_space_size, seed)
         self.update_every = hyperparameter['update_every']
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
@@ -41,18 +72,32 @@ class Agent:
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
         #print(f'action vorher {action}')
-        tmp = self.noise()# * epsilon
+        tmp = self.noise.sample()# * epsilon
         action += tmp
         #action += self.noise() * epsilon #todo
         #print(f'action nachher {action} mit noise {tmp}')
         return np.clip(action, -1, 1)
 
-    # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
+    '''# I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
     def soft_update(self, target_network, local_network, timestep):
         # as mentioned in the udacity benchmark project of the previous project 2 continuous control, update weights only every x-timesteps
         if (timestep % self.update_every == 0):
             for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
-                target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
+                target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)'''
+    def soft_update(self, local_model, target_model, tau):
+        """Soft update model parameters.
+        θ_target = τ*θ_local + (1 - τ)*θ_target
+
+        Params
+        ======
+            local_model: PyTorch model (weights will be copied from)
+            target_model: PyTorch model (weights will be copied to)
+            tau (float): interpolation parameter 
+        """
+        
+        for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
+            target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
+
     
     def reset_noise(self):
         self.noise.reset()
