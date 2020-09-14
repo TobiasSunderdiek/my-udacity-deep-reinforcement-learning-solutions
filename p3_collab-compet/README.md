@@ -47,7 +47,13 @@ As my implementation receives very low mean scores and I could not spot the prob
     As I also use separate models for the agents, I got confident that this is an appropriate way of solving this project. As I also tried to fill the replay buffer with values from random play (which in the beginning got more rewards than my implementation) for some episodes, I got confident that this is an appropriate way. I also got confident to collect random values for 1.000 episodes is an appropriate time. I also looked into the provided repository https://github.com/odellus/tennis and compared it to my code. I also tried out the hyperparameters of this solution in my implementation.
 
 - https://knowledge.udacity.com/questions/101614
-    In my implementation, I only manually initialised the last layer. In this post, the initialization of all layers is provided. I copied this to my code.
+    In my implementation, I only manually initialised the last layer. In this post, the initialization of all layers is provided. I copied this to my code. Also that random sampling at the beginning alone could take about 1.000 episodes gave me confidence about the total time the training could last in the end.
+
+- https://knowledge.udacity.com/questions/315134
+    I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
+    - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
+    #todo
+    I copied some parts of the provided code into my project and marked the parts with comments.
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet
 
