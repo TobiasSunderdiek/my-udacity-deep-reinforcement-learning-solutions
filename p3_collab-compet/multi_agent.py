@@ -74,12 +74,12 @@ class MultiAgent:
             self.agents[i].reset_noise
 
     def select_actions(self, all_agents_states, epsilon):
-        actions = np.zeros([self.num_agents, self.action_state_size])
-        for i in range(self.num_agents):
-            actions[i, :] = self.agents[i].select_action(all_agents_states[i], epsilon)
+        #actions = np.zeros([self.num_agents, self.action_state_size])
+        #for i in range(self.num_agents):
+        #    actions[i, :] = self.agents[i].select_action(all_agents_states[i], epsilon)
         #print(f'their actions {actions}')
-        #my_actions = [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
-        #my_actions = np.asarray(my_actions)
+        actions = [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
+        actions = np.asarray(actions)
         #print(f'my actions {my_actions}')
         return actions
 
@@ -113,18 +113,42 @@ class MultiAgent:
                 
                 # ---------------------------- update critic ---------------------------- #
                 # Get predicted next-state actions and Q values from target models
-                next_actions = [agent.actor_target(n_s) for n_s in next_states]
-                target_actions = torch.cat(next_actions, dim=1).to(device)  
-                Q_targets_next = agent.critic_target(next_x, target_actions)        
+                #next_actions = [agent.actor_target(n_s) for n_s in next_states]
+                #target_actions = torch.cat(next_actions, dim=1).to(device)  
+                #Q_targets_next = agent.critic_target(next_x, target_actions)        
                 # Compute Q targets for current states (y_i)
-                Q_targets = rewards + (self.gamma * Q_targets_next * (1 - dones))        
+                #Q_targets = rewards + (self.gamma * Q_targets_next * (1 - dones))        
                 # Compute critic loss
-                Q_expected = agent.critic_local(x, actions)
-                critic_loss = F.mse_loss(Q_expected, Q_targets)        
+                #Q_expected = agent.critic_local(x, actions)
+                #critic_loss = F.mse_loss(Q_expected, Q_targets)
+
+                #my test
+                agent.critic_local.train()
+                local_q_values = agent.critic_local(x, actions)
+                all_agents_next_actions = []
+                for j in range(self.num_agents):
+                    next_states_agent_j = next_states[j]
+                    agent_j_action = self.agents[j].actor_target(next_states_agent_j)
+                    all_agents_next_actions.append(agent_j_action)
+                target_actions = torch.cat(all_agents_next_actions, dim=1).to(device)  
+                
+                target_q_values = rewards + (self.gamma * agent.critic_target(next_x, target_actions) * (1 - dones))
+                critic_loss = F.mse_loss(local_q_values, target_q_values)
+
+                #my
+                agent.critic_local_optimizer.zero_grad()
+                critic_loss.backward()
+                # I copied this from the course in project 2 continuous control 'Benchmark Implementation' where the udacity's benchmark implementation for the previous project
+                # is described and some special settings are explicitly highlighted  
+                torch.nn.utils.clip_grad_norm_(agent.critic_local.parameters(), 1)
+                agent.critic_local_optimizer.step()
+                agent.critic_local.eval()
+                '''     
                 # Minimize the loss
                 agent.critic_local_optimizer.zero_grad()
                 critic_loss.backward()
                 agent.critic_local_optimizer.step()
+                '''
                 '''
                 # ---------------------------- update actor ---------------------------- #
                 # Compute actor loss
@@ -143,8 +167,6 @@ class MultiAgent:
                 agent.soft_update(agent.actor_target, agent.actor_local, timestep)
                 '''
 
-                #my:
-                
                 #actor
                 # Achtung jedne State einzeln: 
                 actions_local = [self.agents[num_agent].actor_local(state) for state in states]
@@ -157,32 +179,9 @@ class MultiAgent:
                 self.agents[num_agent].soft_update(self.agents[num_agent].actor_target, self.agents[num_agent].actor_local, timestep)
                 
                 '''
-                self.agents[i].critic_local.train()
-                local_q_values = self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), torch.reshape(all_agents_actions, (self.sample_batch_size, 4))) #todo/change insert full batch and reshape
-                #next_actions = self.agents[i].actor_target(all_agents_next_states[i]) all_agents_next_actions
-                all_agents_next_states_tranpose =  torch.transpose(all_agents_next_states, 0, 1)#[128, 2, 24] -> [2, 128, 24]
-                all_agents_next_actions = []
-                for j in range(self.num_agents):
-                    next_states_agent_j = all_agents_next_states_tranpose[j]
-                    agent_j_action = self.agents[j].actor_target(next_states_agent_j)
-                    #print(f'agent_j_action {agent_j_action.shape}') #1024, 2
-                    all_agents_next_actions.append(agent_j_action)
-                all_agents_next_actions = torch.cat(all_agents_next_actions, 1) #das stimmt nicht?: 128,2 und 128,2 (jeweils 1 Agent) -> 128,4
-                #print(f'all agents next actions resphaped for critic target {all_agents_next_actions.shape}')
-                #all_agents_next_actions = self.agents[i].actor_target(all_agents_next_states) #todo for every agent i and sum?
-                rewards_transpose = torch.transpose(all_agents_rewards, 0, 1) #(128,2,1) -> (2,128,1)
-                reward_of_i = rewards_transpose[i]
-                all_agents_dones_transpose = torch.transpose(all_agents_dones, 0, 1) #128,2,1 -> 2,128,1
-                all_agents_dones_of_i = all_agents_dones_transpose[i]
-                target_q_values = reward_of_i + (self.gamma * self.agents[i].critic_target(torch.reshape(all_agents_next_states, (self.sample_batch_size, 48)), all_agents_next_actions) * (1 - all_agents_dones_of_i)) #todo/change insert full batch, add all_agents_next_actions, add reward_of_i agent
-                critic_loss = F.mse_loss(local_q_values, target_q_values)#todo huber loss
-                self.agents[i].critic_local_optimizer.zero_grad()
-                critic_loss.backward()
-                # I copied this from the course in project 2 continuous control 'Benchmark Implementation' where the udacity's benchmark implementation for the previous project
-                # is described and some special settings are explicitly highlighted  
-                torch.nn.utils.clip_grad_norm_(self.agents[i].critic_local.parameters(), 1)
-                self.agents[i].critic_local_optimizer.step()
-                self.agents[i].critic_local.eval()
+                
+                
+                
 
                 '''
            

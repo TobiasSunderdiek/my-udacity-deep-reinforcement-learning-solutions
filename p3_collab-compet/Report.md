@@ -36,6 +36,7 @@ to track motion
 - user their noise
 - I used weight_decay=0.0001 for the critic, deleted
 - select_actions: I used to return an array, here return zeros
+- did not use huber loss like mentioned in MADDPG paper
 
 HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
 HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters
