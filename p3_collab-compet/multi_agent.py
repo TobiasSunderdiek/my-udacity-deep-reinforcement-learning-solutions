@@ -9,6 +9,8 @@ import random
 from collections import namedtuple, deque
 import torch
 
+from replay_buffer import ReplayBuffer
+'''
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class ReplayBuffer:
@@ -26,15 +28,10 @@ class ReplayBuffer:
         self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
         self.batch_size = batch_size
         self.seed = random.seed(seed)
-        self.experience = namedtuple("Experience", field_names=["x", "action", "reward", "next_x", "done"])
+        self.experience = namedtuple("Experience", field_names=(["state", "action", "reward", "next_state", "done"]))
     
     def add(self, x, action, reward, next_x, done):
         """Add a new experience to memory."""
-        
-        # Join a sequence of agents's states, next states and actions along columns
-        x = np.concatenate(x, axis=0)
-        next_x = np.concatenate(next_x, axis=0)
-        action = np.concatenate(action, axis=0)
         
         e = self.experience(x, action, reward, next_x, done)
         self.memory.append(e)
@@ -43,26 +40,27 @@ class ReplayBuffer:
         """Randomly sample a batch of experiences from memory."""
         experiences = random.sample(self.memory, k=self.batch_size)
 
-        x = torch.from_numpy(np.vstack([e.x for e in experiences if e is not None])).float().to(device)
+        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
         actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
         rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
-        next_x = torch.from_numpy(np.vstack([e.next_x for e in experiences if e is not None])).float().to(device)
+        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
         dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-        return (x, actions, rewards, next_x, dones)
+
+        return (states, actions, rewards, next_states, dones)
 
     def __len__(self):
         """Return the current size of internal memory."""
         return len(self.memory)
-
+'''
 class MultiAgent:
     def __init__(self, observation_state_size, action_state_size, hyperparameter, num_agents, seed):
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.num_agents = num_agents
-        # I got using single param for all hyperparameters from udacity code review for my previous project
+        # I got using single param for all hyperparameters from udacity code review for my previous project: P2 Continuous Control
         self.agents = [Agent(observation_state_size, action_state_size, hyperparameter, seed) for i in range(num_agents)]
         self.sample_batch_size = hyperparameter['sample_batch_size']
         self.replay_buffer_size = hyperparameter['replay_buffer_size']
-        self.replay_buffer = ReplayBuffer(self.replay_buffer_size, self.sample_batch_size, seed)
+        self.replay_buffer = ReplayBuffer(action_state_size, self.replay_buffer_size, self.sample_batch_size, seed)
         self.gamma = hyperparameter['gamma']
         self.hyperparameter = hyperparameter
         self.action_state_size = action_state_size
@@ -84,9 +82,10 @@ class MultiAgent:
         return actions
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
-        '''x = np.concatenate(all_agents_states, axis=0)
-        next_x = np.concatenate(all_agents_next_states, axis=0)
-        action = np.concatenate(all_agents_actions, axis=0)'''
+        all_agents_states = np.concatenate(all_agents_states, axis=0)
+        all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
+        all_agents_actions = np.concatenate(all_agents_actions, axis=0)
+         # Join a sequence of agents's states, next states and actions along columns
         
         self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)        
 
@@ -130,7 +129,7 @@ class MultiAgent:
                     next_states_agent_j = next_states[j]
                     agent_j_action = self.agents[j].actor_target(next_states_agent_j)
                     all_agents_next_actions.append(agent_j_action)
-                target_actions = torch.cat(all_agents_next_actions, dim=1).to(device)  
+                target_actions = torch.cat(all_agents_next_actions, dim=1).to(self.device)  
                 
                 target_q_values = rewards + (self.gamma * agent.critic_target(next_x, target_actions) * (1 - dones))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)

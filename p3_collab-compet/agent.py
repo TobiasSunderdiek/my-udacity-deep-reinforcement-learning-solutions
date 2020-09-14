@@ -11,6 +11,7 @@ import copy
 
 OU_THETA = 0.15         # how "strongly" the system reacts to perturbations
 OU_SIGMA = 0.2
+#from noise import OUNoise
 
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
