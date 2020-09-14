@@ -78,13 +78,13 @@ class Agent:
         #print(f'action nachher {action} mit noise {tmp}')
         return np.clip(action, -1, 1)
 
-    '''# I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
+    # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
     def soft_update(self, target_network, local_network, timestep):
         # as mentioned in the udacity benchmark project of the previous project 2 continuous control, update weights only every x-timesteps
         if (timestep % self.update_every == 0):
             for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
-                target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)'''
-    def soft_update(self, local_model, target_model, tau):
+                target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
+    '''def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
 
@@ -96,7 +96,7 @@ class Agent:
         """
         
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
-            target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
+            target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)'''
 
     
     def reset_noise(self):

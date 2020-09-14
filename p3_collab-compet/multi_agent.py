@@ -125,7 +125,7 @@ class MultiAgent:
                 agent.critic_local_optimizer.zero_grad()
                 critic_loss.backward()
                 agent.critic_local_optimizer.step()
-
+                '''
                 # ---------------------------- update actor ---------------------------- #
                 # Compute actor loss
                 # take the current states and predict actions
@@ -139,15 +139,15 @@ class MultiAgent:
                 agent.actor_local_optimizer.step()
                 TAU = 1e-3
                 # ----------------------- update target networks ----------------------- #
-                agent.soft_update(agent.critic_local, agent.critic_target, TAU)
-                agent.soft_update(agent.actor_local, agent.actor_target, TAU)
-
+                agent.soft_update(agent.critic_target, agent.critic_local, timestep)
+                agent.soft_update(agent.actor_target, agent.actor_local, timestep)
+                '''
 
                 #my:
                 
                 #actor
                 # Achtung jedne State einzeln: 
-                '''actions_local = [self.agents[num_agent].actor_local(state) for state in states]
+                actions_local = [self.agents[num_agent].actor_local(state) for state in states]
                 actions_local = torch.cat(actions_local, 1)
                 actor_loss = -self.agents[num_agent].critic_local(x, actions_local).mean()
                 self.agents[num_agent].actor_local_optimizer.zero_grad()
@@ -155,7 +155,7 @@ class MultiAgent:
                 self.agents[num_agent].actor_local_optimizer.step()
                 self.agents[num_agent].soft_update(self.agents[num_agent].critic_target, self.agents[num_agent].critic_local, timestep)
                 self.agents[num_agent].soft_update(self.agents[num_agent].actor_target, self.agents[num_agent].actor_local, timestep)
-                '''
+                
                 '''
                 self.agents[i].critic_local.train()
                 local_q_values = self.agents[i].critic_local(torch.reshape(all_agents_states, (self.sample_batch_size, 48)), torch.reshape(all_agents_actions, (self.sample_batch_size, 4))) #todo/change insert full batch and reshape
