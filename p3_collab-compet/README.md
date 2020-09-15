@@ -72,6 +72,7 @@ As my implementation receives very low mean scores with different hyperparameter
     - I did use leaky relu as activation function within my Actor and Critic, but relu is necessary
     - I added the actions to the first layer of my Critic, but adding actions directly to the input is necessary
     - I did not update the target networks at every steps, but this is necessary
+    - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
     - I did not use a new sample for every agent, I used the same one, but a new one is necessary
     - I used a seed of 2, but a seed of 0 is necessary
     - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary

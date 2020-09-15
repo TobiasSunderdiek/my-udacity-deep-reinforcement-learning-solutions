@@ -26,11 +26,7 @@ class CollaborationAndCompetition:
         # `Benchmark Implementation` show, that solving this problem < 5.000 episodes is possible, therefore I
         # choosed 5.000 as number of episodes
         self.episodes = 5_000
-        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
-        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-        # I changed it to zero
-        seed = 0
-        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents, seed) #todo remove seed or document from solution
+        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
@@ -40,11 +36,12 @@ class CollaborationAndCompetition:
             all_agents_states = env.reset(train_mode=True)[brain_name].vector_observations
             all_agents_score = np.zeros(self.num_agents)
             timestep = 0
-            self.agents.reset()
+            self.agents.reset_noise()
 
             while True:
                 current_epsilon = self.epsilon.calculate_for(timestep)
                 all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
+                all_agents_actions = np.asarray(all_agents_actions)
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
                 self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)

@@ -3,7 +3,7 @@ install:
 	cd udacity_deep_reinforcement_learning &&\
 	git checkout master -- python/ &&\
 	cd python &&\
-	pip install . &&\ #todo necessary?
+	pip install . &&\
 	cd ../.. &&\
 	pip install -r requirements.txt
 

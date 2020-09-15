@@ -24,9 +24,9 @@ Udacity Honor Code: I first added the actions to the first hidden layer. After h
 
 The last layer maps from size `300` to the output dimension of `1`, 
 
-In both, the actor and the critic, the weights and bias of the last layer are initialized by a uniform distribution within `(-3*10e-3, 3*10e-3)`. #todo
+In both, the actor and the critic, the weights and bias of the last layer are initialized by a uniform distribution within `(-3e-3, 3e-3)`. Udacity Honor Code: I set this values to `(-3e-3, 3e-3)` as I had a look into a solution for this project in [9].
 
-I have choosen `leaky relu` as activation function in the hidden layers in both, the actor and the critic. #todo
+Udacity Honor Code: I first have choosen `leaky relu` as activation function in the hidden layers in both, the actor and the critic. After having a look into a solution for this project in [9], I changed it to `relu`.
 
 This model architecture is used for the local and the target network.
 

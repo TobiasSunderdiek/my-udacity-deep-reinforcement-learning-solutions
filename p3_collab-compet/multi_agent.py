@@ -10,28 +10,31 @@ from agent import Agent
 from replay_buffer import ReplayBuffer
 
 class MultiAgent:
-    def __init__(self, observation_state_size, action_state_size, hyperparameter, num_agents, seed):#todo remove seed, but use same seed in Agent + comment from solution
+    def __init__(self, observation_state_size, action_state_size, hyperparameter, num_agents):
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.num_agents = num_agents
         # I got using single param for all hyperparameters from udacity code review for my previous project: P2 Continuous Control
-        self.agents = [Agent(observation_state_size, action_state_size, hyperparameter, seed) for i in range(num_agents)]#todo remove seed, but use same seed in Agent + comment from solution
+        self.agents = [Agent(observation_state_size, action_state_size, hyperparameter) for i in range(num_agents)]
         self.sample_batch_size = hyperparameter['sample_batch_size']
         self.replay_buffer_size = hyperparameter['replay_buffer_size']
+        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
+        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+        # I changed it to zero
+        # Also I had to add it here to due to solution mentioned above, to use it within the replay buffer.
+        seed = 0
         self.replay_buffer = ReplayBuffer(action_state_size, self.replay_buffer_size, self.sample_batch_size, seed)
         self.gamma = hyperparameter['gamma']
         self.hyperparameter = hyperparameter
         self.action_state_size = action_state_size
 
-    def reset(self):#todo rename to reset_noise, my name
+    def reset_noise(self):
         for i in range(self.num_agents):
             # reset noise
             # I got this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb
             self.agents[i].reset_noise
 
     def select_actions(self, all_agents_states, epsilon):
-        actions = [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
-        actions = np.asarray(actions) #todo move back to collab_competition.py
-        return actions
+        return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
         # Udacity Honor Code: Code copied
@@ -48,7 +51,7 @@ class MultiAgent:
     def learn(self, timestep):
         # only learn if enough data available
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
-        if(len(self.replay_buffer) > self.sample_batch_size):#todo >=
+        if(len(self.replay_buffer) >= self.sample_batch_size):
             # critic
             for num_agent, agent in enumerate(self.agents):
                 # Udacity Honor Code: As mentioned in README, I had a bug in my implementation
@@ -101,7 +104,11 @@ class MultiAgent:
                 self.agents[num_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[num_agent].actor_local_optimizer.step()
-                # todo udacity honor code, i made this at differen point, also add to readme
+                # Udacity Honor Code: After having a look in a solution for this project
+                # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+                # I moved updating both target networks here. In my first implementation, I did this separately
+                # at different places, the soft_update of the critic's target in this for-loop directly after the critic's part
+                # and before the actor' part. And only the actor's part here after the actor.
                 self.agents[num_agent].soft_update(self.agents[num_agent].critic_target, self.agents[num_agent].critic_local, timestep)
                 self.agents[num_agent].soft_update(self.agents[num_agent].actor_target, self.agents[num_agent].actor_local, timestep)
                 

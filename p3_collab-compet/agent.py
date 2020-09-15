@@ -33,7 +33,7 @@ class OUNoise:
         return self.state 
 
 class Agent:
-    def __init__(self, observation_state_size, action_space_size, hyperparameter, seed):#todo remove seed or add to doku
+    def __init__(self, observation_state_size, action_space_size, hyperparameter):
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
@@ -42,21 +42,25 @@ class Agent:
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
         # I added it here
+        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
+        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+        # I changed it to zero
+        seed = 0
+        num_agents = 2
         self.actor_local = Actor(observation_state_size, action_space_size, hyperparameter, seed).to(self.device)
         self.actor_target = Actor(observation_state_size, action_space_size, hyperparameter, seed).to(self.device)
-        self.critic_local = Critic(observation_state_size*2, action_space_size*2, hyperparameter, seed).to(self.device)#todo *2 is num_agents, add dynamically
-        self.critic_target = Critic(observation_state_size*2, action_space_size*2, hyperparameter, seed).to(self.device)#todo *2 is num_agents, add dynamically
+        self.critic_local = Critic(observation_state_size*num_agents, action_space_size*num_agents, hyperparameter, seed).to(self.device)
+        self.critic_target = Critic(observation_state_size*num_agents, action_space_size*num_agents, hyperparameter, seed).to(self.device)
         self.tau = hyperparameter['tau']
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), hyperparameter['actor_learning_rate'])
-        # I got how to add weight decay like described in the paper
-        # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
-        # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
+        # Udacity Honor Code: After having a look in a solution for this project
+        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+        # I changed removed my manually set weight decay for critic optimizer.
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
-        #todo add , weight_decay=0.0001) or remove comment above and add comment from solution
-        # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         # Udacity Honor Code: After having a look in a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed noise to class OUNoise
+        # Also I used the same seed 0 here, got this also from the above mentioned solution to use same seed within OUNoise.
         self.noise = OUNoise(action_space_size, seed)
         self.update_every = hyperparameter['update_every']
 
