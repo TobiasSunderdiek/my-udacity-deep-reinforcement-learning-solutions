@@ -3,15 +3,12 @@ import torch.optim as optimizer
 import numpy as np
 
 from model import Actor, Critic
-# I copied the class from here: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179
-import numpy as np
+# Udacity Honor Code: Code copied
+# I copied the class OUNoise from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179
 import random
 import copy
-
 OU_THETA = 0.15         # how "strongly" the system reacts to perturbations
 OU_SIGMA = 0.2
-#from noise import OUNoise
-
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
@@ -36,7 +33,7 @@ class OUNoise:
         return self.state 
 
 class Agent:
-    def __init__(self, observation_state_size, action_space_size, hyperparameter, seed):
+    def __init__(self, observation_state_size, action_space_size, hyperparameter, seed):#todo remove seed or add to doku
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L39
         # and https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L20
@@ -55,9 +52,13 @@ class Agent:
         # first from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L46
         # and second from here: https://medium.com/udacity-pytorch-challengers/ideas-on-how-to-fine-tune-a-pre-trained-model-in-pytorch-184c47185a20
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
+        #todo add , weight_decay=0.0001) or remove comment above and add comment from solution
         # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=1.0, theta=0.15)
         #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
+        # Udacity Honor Code: After having a look in a solution for this project
+        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+        # I changed noise to class OUNoise
         self.noise = OUNoise(action_space_size, seed)
         self.update_every = hyperparameter['update_every']
 
@@ -72,6 +73,9 @@ class Agent:
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
         #print(f'action vorher {action}')
+        # Udacity Honor Code: After having a look in a solution for this project
+        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+        # I removed decreasing noise by epsilon and used noise from OUNoise-Class from solution here
         tmp = self.noise.sample()# * epsilon
         action += tmp
         #action += self.noise() * epsilon #todo

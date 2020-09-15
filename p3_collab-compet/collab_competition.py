@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from multi_agent import MultiAgent
 from epsilon import Epsilon
-import torch #todo only for testing
+import torch #todo only for testing #todo kann wirklich weg
 
 class CollaborationAndCompetition:
     def __init__(self, hyperparameter):
@@ -23,10 +23,15 @@ class CollaborationAndCompetition:
         epsilon_decay_rate = 0.995
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
+        # The provided charts from the Udacity Benchmark Implementation for this project provided in the course
+        # `Benchmark Implementation` show, that solving this problem < 5.000 episodes is possible, therefore I
+        # choosed 5.000 as number of episodes
         self.episodes = 5_000
-        # todo- num of episodes 3000: benchmark impementation image shows, that is can be solved within 2500 episodes
+        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
+        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+        # I changed it to zero
         seed = 0
-        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents, seed)
+        self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents, seed) #todo remove seed or document from solution
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
 
@@ -88,6 +93,9 @@ class CollaborationAndCompetition:
         return max_score
 
 if __name__ == '__main__':
+    # Udacity Honor Code: As my implementation did not reach some scores, I had a look into a solution for this project
+    # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and changed
+    # the hyperparameter
     hyperparameter = {'gamma': 0.99,
                       'sample_batch_size': 250,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
