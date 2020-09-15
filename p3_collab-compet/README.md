@@ -24,12 +24,17 @@ This is my solution for the project **Collaboration and Competition**[1]
 - `make train` starts training the agent
 - `make tensorboard` shows results in tensorboard
 
-## Hyperparameter tuning with tune todo
+## Hyperparameter tuning with tune
 I used tune[7] for doing grid search for the hyperparameters on ranges I have given.
 - `cd PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p3_collab-compet/`
 - adjust hyperparameter-ranges for grid search in `tune.py`
 - adjust path to tennis environment (see Setup) in `tune.py` in line `self.env_filename = ...` relative to tune logdir, e.g. `self.env_filename = self.logdir + '../../../Tennis.app'`
 - `make tune` starts grid search
+
+Some notes on my setup:
+
+- I played around with various hyperparameter ranges in tune.py, the version in this commit is only the last version in a row
+- I did not configure my setup properly and get a 'OSError: handle is closed' exception during the whole process, which I did not investigate further. Important to mention that this is a problem of how I configured my whole machine, this is not a problem coming from tune. I think it can be the problem described in [8].
 
 ## Saved model weights
 Saved model weights of successfully trained agent are provided in `model.pth`
@@ -52,11 +57,14 @@ As my implementation receives very low mean scores and I could not spot the prob
     In my implementation, I only manually initialised the last layer. In this post, the initialization of all layers is provided. I copied this to my code. Also that random sampling at the beginning alone could take about 1.000 episodes gave me confidence about the total time the training could last in the end.
 
 - https://knowledge.udacity.com/questions/315134
+    I got confident, that a correct amount of noise is an essential point in this project.
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
     - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project
     - I did not manually initialized layer 1 and layer 2 of my Actor and Critic, but this is necessary
     - I did use leaky relu as activation function within my Critic, but relu is necessary
+    - I added the actions within the first layer of my Critic, but adding actions to the input is necessary
+     - I did not update the target networks at every steps, but this is necessary
     - used all hyperparameters from here...
     #todo
     I copied some parts of the provided code into my project and marked the parts with comments.
@@ -75,3 +83,5 @@ As my implementation receives very low mean scores and I could not spot the prob
 [6] https://github.com/udacity/deep-reinforcement-learning
 
 [7] https://github.com/ray-project/ray/tree/master/python/ray/tune
+
+[8] https://github.com/Unity-Technologies/ml-agents/issues/1167

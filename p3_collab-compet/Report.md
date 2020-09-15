@@ -5,7 +5,6 @@
 - I choosed to update target network directly within for-loop, due to code-reuse, not original MADDPG, which does this after for-loop, see: https://arxiv.org/abs/1706.02275
 
 
-- new hyperparameter init_weights_variance, hidden_layer_1, hidden_layer_2, sigma, theta
 - I used seed=2, change to seed=0
 - I did not use a new sample for every agent?!
 - I added epsilon to the noise before, here without
@@ -21,7 +20,7 @@
 - user their noise
 - I used weight_decay=0.0001 for the critic, deleted
 - select_actions: I used to return an array, here return zeros
-- did not use huber loss like mentioned in MADDPG paper
+- i did hard update of targets, not in solution, removed it
 
 HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
 HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters
@@ -37,12 +36,7 @@ For every agent, the actor's loss is calculated separately, too. For the actor's
 
 #### Model
 
-- observation space is is 3*8:
-# Vector Observation space size (per agent): 8
-# Number of stacked Vector Observation: 3
-to track motion
-
-I use the DDPG architecture from the DDPG paper[2] section 7 `Experiment Details`.
+I use the DDPG architecture from the DDPG paper[2] section 7 `Experiment Details`. The vector observation space size is 8, with a number of 3 stacked vector observations, a total input size of 24.
 The Actor gets the observation space as input, which is mapped to a dimension of `400` in the first hidden layer. The second hidden layer maps from size `400` to size `300` and the last layer maps to the action size. The last layer uses `tanh` as activation function.
 
 The critic gets the observation space as input, which is mapped to size `400` in the first hidden layer. 
@@ -57,10 +51,10 @@ This model architecture is used for the local and the target network.
 #### Hyperparameter
 
 **buffer_size**
-Configures the maximum size of the replay buffer, older values will be discarded. I started with a size of `10e6`, like described in the DDPG paper. As this takes a while to fill with one agent, I decreased the buffer size to `1e6`, like used in the udacity example in [1]. This also took a while, therefore I decreased to `1e5`. After reading the advice for this project in Udacity Knowledge Base[4] to better use a large buffer, I set value to `1e6`.
+Controls the buffer size of the replay buffer. #todo acutal value+got from solution
 
 **sample_batch_size**
-Configures how much samples at each learning step should be pulled from the replay buffer, actual value `64` identical to the size in the DDPG paper [2].
+Configures how much samples at each learning step should be pulled from the replay buffer, actual value #todo + from solution
 
 **gamma**
 The factor how much future rewards should be noted in the valuation of the current action, actual value `0.99` like in the DDPG paper [2].
@@ -95,6 +89,21 @@ After reading the advice in the Udacity Knowledge Base[4] for this project to im
     epsilon_max_decay_to:
     Configures a minimum value the epsilon should have, regardless the decay rate. Actual value `0.01`
 
+**init_weights_variance**
+Controls the initial uniform weight variance of the last layer of actor and critic. Actual value #todo value+got it from solution
+
+**hidden_layer_1**
+The layer size of the first hidden layer of actor and critic. Actual value #todo value+got it from solution
+
+**hidden_layer_2**
+The layer size of the second hidden layer of actor and critic. Actual value #todo value+got it from solution
+
+**sigma**
+Controls the sigma of the Ohrnstein-Uhlenbeck noise. Actual value #todo value+got form solution
+
+**theta**
+Controls the theta of the Ohrnstein-Uhlenbeck noise. Actual value #todo value+got form solution
+
 #### Rewards
 
 The agent reaches a mean reward of 0.5 over the last 100 episodes after episode #todo.
@@ -123,4 +132,4 @@ The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 
 
 [6] https://github.com/openai/baselines/blob/master/baselines/deepq/replay_buffer.py#L7
 
-[7]
+[7] https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html

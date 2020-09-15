@@ -62,8 +62,8 @@ class Critic(nn.Module):
         # Udacity Honor Code: I did not use relu as activation function, after having a look at the solution from
         # here https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition, I changed
         # the following both activation functions to relu
-        x = F.leaky_relu(self.fc_1(x))
-        x = F.leaky_relu(self.fc_2(x))
+        x = F.relu(self.fc_1(x))
+        x = F.relu(self.fc_2(x))
         x = self.fc_3(x)
 
         return x
