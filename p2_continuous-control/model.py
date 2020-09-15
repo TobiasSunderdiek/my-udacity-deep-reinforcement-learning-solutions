@@ -47,6 +47,6 @@ class Critic(nn.Module):
         x = F.leaky_relu(self.fc_1(input))
         x = torch.cat((x, action), dim=1)
         x = F.leaky_relu(self.fc_2(x))
-        x = self.fc_3(x) # todo understand why no activation
+        x = self.fc_3(x)
 
         return x

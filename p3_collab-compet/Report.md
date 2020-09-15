@@ -15,76 +15,71 @@ I have choosen to update target network directly while iterating over agents and
 #### Model
 
 I use the DDPG architecture from the DDPG paper[2] section 7 `Experiment Details`. The vector observation space size is 8, with a number of 3 stacked vector observations, a total input size of 24.
-The Actor gets the observation space as input, which is mapped to a dimension of `200` in the first hidden layer. The second hidden layer maps from size `200` to size `150` and the last layer maps to the action size. The last layer uses `tanh` as activation function.
+The Actor gets the observation space as input, which is mapped to a dimension of `200` in the first hidden layer. The second hidden layer maps from size `200` to size `150` and the last layer maps to the action size. Udacity Honor Code: I copied this values from a solution for this project from [9].
 
-The critic gets the observation space as input, which is mapped to size `400` in the first hidden layer. 
-To the second hidden layer, the actions are added in the input and then mapped to a dimension of `300`. The last layer maps from size `300` to the output dimension of `1`, 
+The last layer uses `tanh` as activation function.
 
-In both, the actor and the critic, the weights and bias of the last layer are initialized by a uniform distribution within `(-3*10e-3, 3*10e-3)`.
+The critic gets the observation space and actions as input, which are added before the first hidden layer and then mapped to size `200` in the first hidden layer. To the second hidden layer has a dimension of `150`. 
+Udacity Honor Code: I first added the actions to the first hidden layer. After having a look into a solution for this project in [8], I added the actions to the inputs before the first hidden layer. I also copied the layer sizes `200` and `150` from a solution for this project from [8].
 
-I have choosen `leaky relu` as activation function in the hidden layers in both, the actor and the critic.
+The last layer maps from size `300` to the output dimension of `1`, 
+
+In both, the actor and the critic, the weights and bias of the last layer are initialized by a uniform distribution within `(-3*10e-3, 3*10e-3)`. #todo
+
+I have choosen `leaky relu` as activation function in the hidden layers in both, the actor and the critic. #todo
 
 This model architecture is used for the local and the target network.
 
 #### Hyperparameter
 
 **buffer_size**
-Controls the buffer size of the replay buffer. #todo acutal value+got from solution
+Controls the buffer size of the replay buffer, actual value 1e5. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **sample_batch_size**
-Configures how much samples at each learning step should be pulled from the replay buffer, actual value #todo + from solution
+Configures how much samples at each learning step should be pulled from the replay buffer, actual value 250. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **gamma**
-The factor how much future rewards should be noted in the valuation of the current action, actual value `0.99` like in the DDPG paper [2].
+The factor how much future rewards should be noted in the valuation of the current action, actual value `0.99`. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **tau**
-Configures the ratio of how much the target weights in the target network should be updated with actual weights during update process, actual value `1e-3` like in the DDPG paper [2].
+Configures the ratio of how much the target weights in the target network should be updated with actual weights during update process, actual value `1e-3`. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **actor_learning_rate**
-The learning rate of the actors' optimizer, actual value `10e-4` like in the DDPG paper [2].
+The learning rate of the actors' optimizer, actual value `1e-4`. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **critic_learning_rate**
-The learning rate of the critic's optimizer, actual value `10e-3` like in the DDPG paper [2].
+The learning rate of the critic's optimizer, actual value `1e-3`. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **update_every**
-Controls how often the weights of the target network should be updated, actual value `10`, which means every 10th timestep. I added this functionality after reading the advice to this project in the Udacity Knowledge Base[4] to do soft-update every 10 or 20 timesteps.
+Controls how often the weights of the target network should be updated, actual value `1`, which means every timestep. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **weight_decay for critic optimizer**
-In the DDPG paper[2] the optimizer for the critic has a weight_decay of `10e-2`, after playing around with the other hyperparameters and not getting some progress, I had a look into [3] and changed the weight_decay to `0.0001`.
+Udacity Honor Code: I set this value to zero as I had a look into a solution for this project in [8].
 
 **noise**
-In the DDPG paper[2] to enable exploration, a noise generated with an Ornstein-Uhlenbeck process is added to the selected action. The Noise is configured with θ = 0.15 and σ = 0.2. #todo from sulu
+In the DDPG paper[2] to enable exploration, a noise generated with an Ornstein-Uhlenbeck process is added to the selected action. The Noise is configured with θ = 0.15 and σ = 0.2. Udacity Honor Code: I copied this values from a solution for this project from [8].
 
 **epsilon**
-After reading the advice in the Udacity Knowledge Base[4] for this project to implement anything that reduces noise over time, I added epsilon as a factor for the noise.
-
-    epsilon_start:
-    Configures the epsilon used to reduce noise over time at start of each episode. Actual value is `0.1`.
-
-    epsilon_decay_rate:
-    Configures how much the epsilon should decay after each timestep, actual value `0.995`.
-
-    epsilon_max_decay_to:
-    Configures a minimum value the epsilon should have, regardless the decay rate. Actual value `0.01`
+Udacity Honor Code: I removed this value as I had a look into a solution for this project in [8], noise decay is not necessary.
 
 **init_weights_variance**
-Controls the initial uniform weight variance of the last layer of actor and critic. Actual value #todo value+got it from solution see [8]
+Controls the initial uniform weight variance of the last layer of actor and critic. Actual value (-3e-3, 3e-3). Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **hidden_layer_1**
-The layer size of the first hidden layer of actor and critic. Actual value #todo value+got it from solution
+The layer size of the first hidden layer of actor and critic. Actual value 200. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **hidden_layer_2**
-The layer size of the second hidden layer of actor and critic. Actual value #todo value+got it from solution
+The layer size of the second hidden layer of actor and critic. Actual value 150. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **sigma**
-Controls the sigma of the Ohrnstein-Uhlenbeck noise. Actual value #todo value+got form solution
+Controls the sigma of the Ohrnstein-Uhlenbeck noise. Actual value 0.2. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 **theta**
-Controls the theta of the Ohrnstein-Uhlenbeck noise. Actual value #todo value+got form solution
+Controls the theta of the Ohrnstein-Uhlenbeck noise. Actual value 0.15. Udacity Honor Code: I copied this value from a solution for this project from [8].
 
 #### Rewards
 
-The agent reaches a mean reward of 0.5 over the last 100 episodes after episode #todo.
+The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 2302.
 
 ![mean reward plot](tensorboard_reward.png)
 
@@ -109,3 +104,5 @@ The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 
 [7] https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html
 
 [8] https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md
+
+[9] https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/model.py
