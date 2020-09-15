@@ -12,7 +12,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 from multi_agent import MultiAgent
 from epsilon import Epsilon
-import torch #todo only for testing #todo kann wirklich weg
 
 class CollaborationAndCompetition:
     def __init__(self, hyperparameter):
@@ -46,31 +45,11 @@ class CollaborationAndCompetition:
             while True:
                 current_epsilon = self.epsilon.calculate_for(timestep)
                 all_agents_actions = self.agents.select_actions(all_agents_states, current_epsilon)
-                #print(all_agents_actions)
-                #all_agents_actions = np.asarray(all_agents_actions)
-                #print("my")
-                #print(all_agents_actions)
-                #todo remove
-                #if(count_rewards < 1024):
-                #    all_agents_actions = np.random.randn(self.num_agents, 2) # select an action (for each agent)
-                #    all_agents_actions = np.clip(all_agents_actions, -1, 1)
-                #print('rand')
-                #print(all_agents_actions)
-                
-                
-
                 env_info = env.step(all_agents_actions)[brain_name]
                 all_agents_next_states, all_agents_rewards, all_agents_dones = env_info.vector_observations, env_info.rewards, env_info.local_done
-                
                 self.agents.add_to_buffer(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 self.agents.learn(timestep)
-
-                
-                #neu
-                #self.agents.step(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)
                 all_agents_score += all_agents_rewards
-                #print(f'all_agents_rewards {all_agents_rewards}')
-                #print(f'all_agents_score {all_agents_score}')
                 all_agents_states = all_agents_next_states
                 timestep += 1
                 if any(all_agents_dones):

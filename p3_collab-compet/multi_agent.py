@@ -3,61 +3,12 @@
 # the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
 # provided by Udacity
 ###########################################
-
 import torch
 import torch.nn.functional as F
 import numpy as np
-#from replay_buffer import ReplayBuffer
 from agent import Agent
-# I copied the class from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L154
-import numpy as np
-import random
-from collections import namedtuple, deque
-import torch
-
 from replay_buffer import ReplayBuffer
-'''
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class ReplayBuffer:
-    """Fixed-size buffer to store experience tuples."""
-
-    def __init__(self, buffer_size, batch_size, seed):
-        """Initialize a ReplayBuffer object.
-        Params
-        ======
-            action_size (int): dimension of each action
-            buffer_size (int): maximum size of buffer
-            batch_size (int): size of each training batch
-            seed (int): seed
-        """
-        self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
-        self.batch_size = batch_size
-        self.seed = random.seed(seed)
-        self.experience = namedtuple("Experience", field_names=(["state", "action", "reward", "next_state", "done"]))
-    
-    def add(self, x, action, reward, next_x, done):
-        """Add a new experience to memory."""
-        
-        e = self.experience(x, action, reward, next_x, done)
-        self.memory.append(e)
-    
-    def sample(self):
-        """Randomly sample a batch of experiences from memory."""
-        experiences = random.sample(self.memory, k=self.batch_size)
-
-        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
-        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
-        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
-        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
-        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-
-        return (states, actions, rewards, next_states, dones)
-
-    def __len__(self):
-        """Return the current size of internal memory."""
-        return len(self.memory)
-'''
 class MultiAgent:
     def __init__(self, observation_state_size, action_state_size, hyperparameter, num_agents, seed):#todo remove seed, but use same seed in Agent + comment from solution
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -78,13 +29,8 @@ class MultiAgent:
             self.agents[i].reset_noise
 
     def select_actions(self, all_agents_states, epsilon):
-        #actions = np.zeros([self.num_agents, self.action_state_size])
-        #for i in range(self.num_agents):
-        #    actions[i, :] = self.agents[i].select_action(all_agents_states[i], epsilon)
-        #print(f'their actions {actions}')
         actions = [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
         actions = np.asarray(actions) #todo move back to collab_competition.py
-        #print(f'my actions {my_actions}')
         return actions
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
@@ -132,7 +78,7 @@ class MultiAgent:
                 all_agents_next_actions = [self.agents[num_agent].actor_target(next_state_for_agent) for next_state_for_agent in next_states]
                 target_actions = torch.cat(all_agents_next_actions, dim=1).to(self.device)  
                 
-                target_q_values = rewards + (self.gamma * agent.critic_target(next_x, target_actions) * (1 - dones))
+                target_q_values = rewards + (self.gamma * agent.critic_target(next_x, target_actions).detach() * (1 - dones))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)
 
                 agent.critic_local_optimizer.zero_grad()

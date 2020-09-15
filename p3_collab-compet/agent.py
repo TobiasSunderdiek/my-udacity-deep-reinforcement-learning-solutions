@@ -54,8 +54,6 @@ class Agent:
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
         #todo add , weight_decay=0.0001) or remove comment above and add comment from solution
         # todo self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
-        #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=1.0, theta=0.15)
-        #self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=hyperparameter['sigma'], theta=hyperparameter['theta'])
         # Udacity Honor Code: After having a look in a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed noise to class OUNoise
@@ -72,14 +70,10 @@ class Agent:
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
-        #print(f'action vorher {action}')
         # Udacity Honor Code: After having a look in a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I removed decreasing noise by epsilon and used noise from OUNoise-Class from solution here
-        tmp = self.noise.sample()# * epsilon
-        action += tmp
-        #action += self.noise() * epsilon #todo
-        #print(f'action nachher {action} mit noise {tmp}')
+        action += self.noise.sample()
         return np.clip(action, -1, 1)
 
     # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
@@ -88,20 +82,6 @@ class Agent:
         if (timestep % self.update_every == 0):
             for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
                 target_param.data.copy_((1-self.tau)*target_param.data + self.tau*local_param.data)
-    '''def soft_update(self, local_model, target_model, tau):
-        """Soft update model parameters.
-        θ_target = τ*θ_local + (1 - τ)*θ_target
-
-        Params
-        ======
-            local_model: PyTorch model (weights will be copied from)
-            target_model: PyTorch model (weights will be copied to)
-            tau (float): interpolation parameter 
-        """
-        
-        for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
-            target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)'''
-
     
     def reset_noise(self):
         self.noise.reset()
