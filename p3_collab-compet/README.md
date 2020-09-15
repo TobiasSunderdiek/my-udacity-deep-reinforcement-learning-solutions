@@ -56,15 +56,26 @@ As my implementation receives very low mean scores and I could not spot the prob
 - https://knowledge.udacity.com/questions/101614
     In my implementation, I only manually initialised the last layer. In this post, the initialization of all layers is provided. I copied this to my code. Also that random sampling at the beginning alone could take about 1.000 episodes gave me confidence about the total time the training could last in the end.
 
+- https://knowledge.udacity.com/questions/303326
+    I got confident that the task can be solved within 3.000 episodes.
+
+- https://knowledge.udacity.com/questions/261898
+    I got confident that my procedure is basically correct. I got confident that adding the right amount of noise is an very important part in this project.
+
 - https://knowledge.udacity.com/questions/315134
     I got confident, that a correct amount of noise is an essential point in this project.
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
     - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project
+    - I copied OUNoise-class from https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179 to my implementation
     - I did not manually initialized layer 1 and layer 2 of my Actor and Critic, but this is necessary
-    - I did use leaky relu as activation function within my Critic, but relu is necessary
-    - I added the actions within the first layer of my Critic, but adding actions to the input is necessary
-     - I did not update the target networks at every steps, but this is necessary
+    - I did use leaky relu as activation function within my Actor and Critic, but relu is necessary
+    - I added the actions to the first layer of my Critic, but adding actions directly to the input is necessary
+    - I did not update the target networks at every steps, but this is necessary
+    - I did not use a new sample for every agent, I used the same one, but a new one is necessary
+    - I used a seed of 2, but a seed of 0 is necessary
+    - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary
+    - I did a hard update from local to target networks weights on initialization, but this was not necessary
     - used all hyperparameters from here...
     #todo
     I copied some parts of the provided code into my project and marked the parts with comments.

@@ -11,9 +11,8 @@ def hidden_init(layer):
     return (-lim, lim)
 
 class Actor(nn.Module):
-    """ I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
-        and from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L12
-    """
+    # I got this from the description in the paper: https://arxiv.org/pdf/1509.02971.pdf
+    # and from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L12
     def __init__(self, input_size, action_size, hyperparameter, seed):
         super().__init__()
         # I got using a seed from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/model.py#L26

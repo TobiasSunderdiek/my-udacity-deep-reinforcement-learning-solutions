@@ -2,42 +2,20 @@
 
 #### Learning Algorithm
 
-- I choosed to update target network directly within for-loop, due to code-reuse, not original MADDPG, which does this after for-loop, see: https://arxiv.org/abs/1706.02275
-
-
-- I used seed=2, change to seed=0
-- I did not use a new sample for every agent?!
-- I added epsilon to the noise before, here without
-- need to remove __pycache__/ every run?
-- depends on init vars, every run is different?
-- do soft update at every agents loop, I had it after the agents loop before
-- in model: +actions size moved to input layer, dont know why my version not works
-- in model: lim = 1. / np.sqrt(fan_in) for init other layers
-- in model: use relu instead of leaky_relu
 - in my learn: actor: I did actor_local(all_states) for ALL agents and summed the result up: correct: only for the agent in the loop
+--- das ist jetzt auch noch falsch in actor_target?!
 - AND not (all_states), but for every single state one call, array result up
-- use their replay buffer
-- user their noise
-- I used weight_decay=0.0001 for the critic, deleted
-- select_actions: I used to return an array, here return zeros
-- i did hard update of targets, not in solution, removed it
 
-HELP from udacity: https://knowledge.udacity.com/questions/303326 -> no epsiodes ~5_000
-HELP: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md hyperparameters
-- https://knowledge.udacity.com/questions/261898
 
 I have choosen a MADDPG[2] to solve this environment. In this project, the MADDPG consists of 2 agents and a total of 4 neural networks per agent, divided into Actor (local version and target version) and Critic (local version and target version). Each agent's actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward for the agent. For every of the 2 agents, the next actions are predicted separately and added into a list. Every of the 2 agent's critic gets this list (the list is caluclated new for every critic) as input to get the Q-value. This calculation is done for every local and target critic of both agents. The critic's loss is calculated with the local and target Q-value. This is done for each agent separately.
 For every agent, the actor's loss is calculated separately, too. For the actor's loss, the next actions for the local actor are predicted and used within the agent's local critic to estimate a reward. This estimated reward represents the loss, which then can be optimized by gradient descent. As gradient descent decreases the loss, the estimated reward is prefixed with a negative sign, to use gradient descent as gradient ascent. To enable exploration, a noise is added to every predicted action for every agent. All of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep. All agents share one replay buffer.
 
-
-# I used the Ornstein-Uhlenbeck implementation from OpenAI-Baselines[5].
-
-#I used the ReplayBuffer implementation from OpenAI-Baselines[6].
+I have choosen to update target network directly while iterating over agents and update their local networks, due to code-reuse from DDPG implementation of previous project 2 `Continous Control`. Here my implementation differs from MADDPG[2], which does this in a separate step after the for-loop.
 
 #### Model
 
 I use the DDPG architecture from the DDPG paper[2] section 7 `Experiment Details`. The vector observation space size is 8, with a number of 3 stacked vector observations, a total input size of 24.
-The Actor gets the observation space as input, which is mapped to a dimension of `400` in the first hidden layer. The second hidden layer maps from size `400` to size `300` and the last layer maps to the action size. The last layer uses `tanh` as activation function.
+The Actor gets the observation space as input, which is mapped to a dimension of `200` in the first hidden layer. The second hidden layer maps from size `200` to size `150` and the last layer maps to the action size. The last layer uses `tanh` as activation function.
 
 The critic gets the observation space as input, which is mapped to size `400` in the first hidden layer. 
 To the second hidden layer, the actions are added in the input and then mapped to a dimension of `300`. The last layer maps from size `300` to the output dimension of `1`, 
@@ -75,7 +53,7 @@ Controls how often the weights of the target network should be updated, actual v
 In the DDPG paper[2] the optimizer for the critic has a weight_decay of `10e-2`, after playing around with the other hyperparameters and not getting some progress, I had a look into [3] and changed the weight_decay to `0.0001`.
 
 **noise**
-In the DDPG paper[2] to enable exploration, a noise generated with an Ornstein-Uhlenbeck process is added to the selected action. The Noise is configured with θ = 0.15 and σ = 0.2.
+In the DDPG paper[2] to enable exploration, a noise generated with an Ornstein-Uhlenbeck process is added to the selected action. The Noise is configured with θ = 0.15 and σ = 0.2. #todo from sulu
 
 **epsilon**
 After reading the advice in the Udacity Knowledge Base[4] for this project to implement anything that reduces noise over time, I added epsilon as a factor for the noise.
@@ -90,7 +68,7 @@ After reading the advice in the Udacity Knowledge Base[4] for this project to im
     Configures a minimum value the epsilon should have, regardless the decay rate. Actual value `0.01`
 
 **init_weights_variance**
-Controls the initial uniform weight variance of the last layer of actor and critic. Actual value #todo value+got it from solution
+Controls the initial uniform weight variance of the last layer of actor and critic. Actual value #todo value+got it from solution see [8]
 
 **hidden_layer_1**
 The layer size of the first hidden layer of actor and critic. Actual value #todo value+got it from solution
@@ -128,8 +106,6 @@ The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 
 
 [4] https://knowledge.udacity.com/questions/277763
 
-[5] https://github.com/openai/baselines/blob/master/baselines/ddpg/noise.py#L49
-
-[6] https://github.com/openai/baselines/blob/master/baselines/deepq/replay_buffer.py#L7
-
 [7] https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html
+
+[8] https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/Report.md

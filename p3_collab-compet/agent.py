@@ -3,8 +3,7 @@ import torch.optim as optimizer
 import numpy as np
 
 from model import Actor, Critic
-#from noise import OUNoise
-# I copied the class from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L132
+# I copied the class from here: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179
 import numpy as np
 import random
 import copy
