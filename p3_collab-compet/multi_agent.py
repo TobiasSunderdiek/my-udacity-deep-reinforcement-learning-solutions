@@ -1,3 +1,9 @@
+###########################################
+# This file is based on
+# the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
+# provided by Udacity
+###########################################
+
 import torch
 import torch.nn.functional as F
 import numpy as np

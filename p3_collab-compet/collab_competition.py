@@ -24,6 +24,7 @@ class CollaborationAndCompetition:
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
         self.episodes = 5_000
+        # todo- num of episodes 3000: benchmark impementation image shows, that is can be solved within 2500 episodes
         seed = 0
         self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents, seed)
         self.scores = deque(maxlen=100)

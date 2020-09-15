@@ -35,6 +35,8 @@ I used tune[7] for doing grid search for the hyperparameters on ranges I have gi
 Saved model weights of successfully trained agent are provided in `model.pth`
 
 ## Udacity Honor Code
+I used the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material) as a blueprint for this project and got parts of `multi_agent.py` from there. To not just copy the parts, I had a look at the provided lab-code, tried to implement parts of it from my mind and compared it with the provided lab-code. To correct my errors during this process, I did some loops of comparing with the lab-implementation and changing my code.
+
 As my implementation receives very low mean scores and I could not spot the problem, I reached out to the following resources to get help:
 
 - https://knowledge.udacity.com/questions/172077
@@ -52,8 +54,13 @@ As my implementation receives very low mean scores and I could not spot the prob
 - https://knowledge.udacity.com/questions/315134
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
+    - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project
+    - I did not manually initialized layer 1 and layer 2 of my Actor and Critic, but this is necessary
+    - I did use leaky relu as activation function within my Critic, but relu is necessary
+    - used all hyperparameters from here...
     #todo
     I copied some parts of the provided code into my project and marked the parts with comments.
+    #todo credits
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet
 
