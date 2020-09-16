@@ -54,7 +54,7 @@ class MultiAgent:
             # critic
             for actual_agent in range(self.agents):
                 (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
-
+                
                 
 
 
@@ -76,46 +76,46 @@ class MultiAgent:
                 # I got the implementation of updating the actor and critic from
                 # the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
                 # provided by udacity
-                agent.critic_local.train()
-                local_q_values = agent.critic_local(x, actions)
+                self.agents[actual_agent].critic_local.train()
+                local_q_values = self.agents[actual_agent].critic_local(all_agents_states, this_agents_doubled)
 
                 # Udacity Honor Code: As mentioned in README, I called
                 # actor_target not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                all_agents_next_actions = [self.agents[num_agent].actor_target(next_state_for_agent) for next_state_for_agent in next_states]
-                target_actions = torch.cat(all_agents_next_actions, dim=1).to(self.device)  
+                this_agents_next_actions = [self.agents[actual_agent].actor_target(next_state_for_agent) for next_state_for_agent in this_agents_next_states]
+                target_actions = torch.cat(this_agents_next_actions, dim=1).to(self.device)  
                 
-                target_q_values = rewards + (self.gamma * agent.critic_target(next_x, target_actions).detach() * (1 - dones))
+                target_q_values = rewards + (self.gamma * self.agents[actual_agent].critic_target(all_agents_next_actions, target_actions).detach() * (1 - dones))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)
 
-                agent.critic_local_optimizer.zero_grad()
+                self.agents['actual_agent'].critic_local_optimizer.zero_grad()
                 critic_loss.backward()
                 # I copied this from the course in project 2 Continuous Control 'Benchmark Implementation' where the udacity's benchmark implementation for the previous project
                 # is described and some special settings are explicitly highlighted  
-                torch.nn.utils.clip_grad_norm_(agent.critic_local.parameters(), 1)
-                agent.critic_local_optimizer.step()
-                agent.critic_local.eval()
+                torch.nn.utils.clip_grad_norm_(self.agents['actual_agent'].critic_local.parameters(), 1)
+                self.agents['actual_agent'].critic_local_optimizer.step()
+                self.agents['actual_agent'].critic_local.eval()
 
                 #actor
                 # Udacity Honor Code: As mentioned in README, I called
                 # actor_local not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                actions_local = [self.agents[num_agent].actor_local(state) for state in states]
-                actions_local = torch.cat(actions_local, 1)
+                actions_local = [self.agents['actual_agent'].actor_local(state_for_this_agent) for state_for_this_agent in this_agents_states]
+                actions_local_doubled = torch.cat(actions_local, 1)
 
-                actor_loss = -self.agents[num_agent].critic_local(x, actions_local).mean()
-                self.agents[num_agent].actor_local_optimizer.zero_grad()
+                actor_loss = -self.agents['actual_agent'].critic_local(all_agents_states, actions_local_doubled).mean()
+                self.agents[actual_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
-                self.agents[num_agent].actor_local_optimizer.step()
+                self.agents[actual_agent].actor_local_optimizer.step()
                 # Udacity Honor Code: After having a look in a solution for this project
                 # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 # I moved updating both target networks here. In my first implementation, I did this separately
                 # at different places, the soft_update of the critic's target in this for-loop directly after the critic's part
                 # and before the actor' part. And only the actor's part here after the actor.
-                self.agents[num_agent].soft_update(self.agents[num_agent].critic_target, self.agents[num_agent].critic_local, timestep)
-                self.agents[num_agent].soft_update(self.agents[num_agent].actor_target, self.agents[num_agent].actor_local, timestep)
+                self.agents[actual_agent].soft_update(self.agents[actual_agent].critic_target, self.agents[actual_agent].critic_local, timestep)
+                self.agents[actual_agent].soft_update(self.agents[actual_agent].actor_target, self.agents[actual_agent].actor_local, timestep)
                 
     def save(self):
         data = {}
