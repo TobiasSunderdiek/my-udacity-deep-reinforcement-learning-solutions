@@ -17,7 +17,7 @@ class MultiAgent:
         self.agents = [Agent(observation_state_size, action_state_size, hyperparameter) for i in range(num_agents)]
         self.sample_batch_size = hyperparameter['sample_batch_size']
         self.replay_buffer_size = hyperparameter['replay_buffer_size']
-        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
+        # In my first implementation I used a seed of 2, after having a look at a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed it to zero
         # Also I had to add it here to due to solution mentioned above, to use it within the replay buffer.
@@ -37,7 +37,8 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
-        #todo credits
+        # I did not transform the observations from the buffer correct,
+        # I got the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         all_agents_states = np.concatenate(all_agents_states, axis=0)
         all_agents_actions = np.concatenate(all_agents_actions, axis=0)
         #all_agents_rewards = np.concatenate(all_agents_rewards, axis=0) # zero-dimensional arrays cannot be concatenated
@@ -55,7 +56,9 @@ class MultiAgent:
             # critic
             for actual_agent in range(self.num_agents):
                 (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
-                #todo credits
+                # I did not transform the observations from the buffer correct,
+                # I got the correct transformataion from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+                
                 all_states_for_this_agent = torch.chunk(all_agents_states, 2, dim=1)
                 all_rewards_for_this_agent = all_agents_rewards[:, actual_agent].reshape(self.sample_batch_size, 1)
                 all_next_states_for_this_agent = torch.chunk(all_agents_next_states, 2, dim=1)
@@ -67,8 +70,7 @@ class MultiAgent:
                 self.agents[actual_agent].critic_local.train()
                 local_q_values = self.agents[actual_agent].critic_local(all_agents_states, all_agents_actions)
 
-                # Udacity Honor Code: As mentioned in README, I called
-                # actor_target not only for the agent within this loop, but for all agents
+                # I called actor_target not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 this_agents_next_actions = [self.agents[actual_agent].actor_target(next_state_for_agent) for next_state_for_agent in all_next_states_for_this_agent]
@@ -86,8 +88,7 @@ class MultiAgent:
                 self.agents[actual_agent].critic_local.eval()
 
                 #actor
-                # Udacity Honor Code: As mentioned in README, I called
-                # actor_local not only for the agent within this loop, but for all agents
+                # I called actor_local not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 actions_local = [self.agents[actual_agent].actor_local(state_for_this_agent) for state_for_this_agent in all_states_for_this_agent]
@@ -97,7 +98,7 @@ class MultiAgent:
                 self.agents[actual_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[actual_agent].actor_local_optimizer.step()
-                # Udacity Honor Code: After having a look in a solution for this project
+                # After having a look in a solution for this project
                 # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 # I moved updating both target networks here. In my first implementation, I did this separately
                 # at different places, the soft_update of the critic's target in this for-loop directly after the critic's part

@@ -15,7 +15,7 @@ class Agent:
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
         # I added it here
-        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
+        # In my first implementation I used a seed of 2, after having a look at a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed it to zero
         seed = 0
@@ -26,11 +26,11 @@ class Agent:
         self.critic_target = Critic(observation_state_size*num_agents, action_space_size*num_agents, hyperparameter, seed).to(self.device)
         self.tau = hyperparameter['tau']
         self.actor_local_optimizer = optimizer.Adam(self.actor_local.parameters(), hyperparameter['actor_learning_rate'])
-        # Udacity Honor Code: After having a look in a solution for this project
+        # After having a look in a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed removed my manually set weight decay for critic optimizer.
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
-        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) #todo if keep, add comment to readme confident about value
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         self.update_every = hyperparameter['update_every']
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64

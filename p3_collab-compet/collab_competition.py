@@ -23,9 +23,9 @@ class CollaborationAndCompetition:
         epsilon_max_decay_to = 0.01
         self.epsilon = Epsilon(epsilon_start, epsilon_decay_rate, epsilon_max_decay_to)
         # The provided charts from the Udacity Benchmark Implementation for this project provided in the course
-        # `Benchmark Implementation` show, that solving this problem < 5.000 episodes is possible, therefore I
-        # choosed 5.000 as number of episodes
-        self.episodes = 10_000 #todo
+        # `Benchmark Implementation` show, that solving this problem < 5.000 episodes is possible. During my training
+        # I was not sure if my implementation needs more episodes, therfore increased it.
+        self.episodes = 10_000
         self.agents = MultiAgent(observation_state_size, action_space_size, hyperparameter, self.num_agents)
         self.scores = deque(maxlen=100)
         self.writer = SummaryWriter()
@@ -69,9 +69,6 @@ class CollaborationAndCompetition:
         return max_score
 
 if __name__ == '__main__':
-    # Udacity Honor Code: As my implementation did not reach some scores, I had a look into a solution for this project
-    # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and changed
-    # the hyperparameter
     hyperparameter = {'gamma': 0.99,
                       'sample_batch_size': 128,
                       # cast buffer size to int, I got the casting from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py#L12
@@ -80,7 +77,7 @@ if __name__ == '__main__':
                       'tau': 0.01,
                       'actor_learning_rate': 0.0001,
                       'critic_learning_rate': 0.0003,
-                      'update_every': 1,# all original but this is 1
+                      'update_every': 1,
                       'init_weights_variance': 3*10e-3,
                       'hidden_layer_1': 400,
                       'hidden_layer_2': 300,
