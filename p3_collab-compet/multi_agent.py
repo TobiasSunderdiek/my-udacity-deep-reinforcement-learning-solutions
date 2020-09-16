@@ -61,7 +61,7 @@ class MultiAgent:
                 state, action, reward, next_state, done = experiences
                 # Udacity Honor Code: As mentioned in README, I had a bug in the transformation of
                 # the observations out of the replay buffer
-                # Got the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
+                # I copied the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 x, actions, rewards, next_x, dones = state, action, reward, next_state, done
                 states = torch.chunk(x, 2, dim = 1)
                 next_states = torch.chunk(next_x, 2, dim = 1)

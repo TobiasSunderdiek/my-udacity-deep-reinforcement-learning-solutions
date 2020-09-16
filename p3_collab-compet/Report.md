@@ -2,11 +2,6 @@
 
 #### Learning Algorithm
 
-- in my learn: actor: I did actor_local(all_states) for ALL agents and summed the result up: correct: only for the agent in the loop
---- das ist jetzt auch noch falsch in actor_target?!
-- AND not (all_states), but for every single state one call, array result up
-
-
 I have choosen a MADDPG[2] to solve this environment. In this project, the MADDPG consists of 2 agents and a total of 4 neural networks per agent, divided into Actor (local version and target version) and Critic (local version and target version). Each agent's actor is able to predict the actions in continuous space. In this algorithm, the actor deterministically predicts one action, the action which maximizes the reward for the agent. For every of the 2 agents, the next actions are predicted separately and added into a list. Every of the 2 agent's critic gets this list (the list is caluclated new for every critic) as input to get the Q-value. This calculation is done for every local and target critic of both agents. The critic's loss is calculated with the local and target Q-value. This is done for each agent separately.
 For every agent, the actor's loss is calculated separately, too. For the actor's loss, the next actions for the local actor are predicted and used within the agent's local critic to estimate a reward. This estimated reward represents the loss, which then can be optimized by gradient descent. As gradient descent decreases the loss, the estimated reward is prefixed with a negative sign, to use gradient descent as gradient ascent. To enable exploration, a noise is added to every predicted action for every agent. All of the target networks are copies from their local networks and not trained by backpropagation. Instead, their weights are updated with a very small portion of their related local weights every timestep. All agents share one replay buffer.
 
@@ -79,7 +74,7 @@ Controls the theta of the Ohrnstein-Uhlenbeck noise. Actual value 0.15. Udacity 
 
 #### Rewards
 
-The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 2302.
+The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 3747.
 
 ![mean reward plot](tensorboard_reward.png)
 

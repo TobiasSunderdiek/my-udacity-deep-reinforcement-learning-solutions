@@ -25,7 +25,7 @@ This is my solution for the project **Collaboration and Competition**[1]
 - `make tensorboard` shows results in tensorboard
 
 ## Hyperparameter tuning with tune
-I used tune[7] for doing grid search for the hyperparameters on ranges I have given.
+start tune[7] for doing grid search for hyperparameters by
 - `cd PATH_WHERE_YOU_CLONED_THIS_REPO_TO/p3_collab-compet/`
 - adjust hyperparameter-ranges for grid search in `tune.py`
 - adjust path to tennis environment (see Setup) in `tune.py` in line `self.env_filename = ...` relative to tune logdir, e.g. `self.env_filename = self.logdir + '../../../Tennis.app'`
@@ -78,7 +78,7 @@ As my implementation receives very low mean scores with different hyperparameter
     - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary
     - I did a hard update from local to target networks weights on initialization, but this was not necessary
     - I copied all hyperparameters from https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L12 to my implementation
-    - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method, instead of calling it only for the actual agent of the loop
+    - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method and merged the results, instead of calling it only for the actual agent of the loop
     - I am not sure if I mentioned here and in my implementation all the bugs I could fix with the help of this repository, maybe there where some more.
 
     I copied some parts of the provided code into my project and marked the parts with comments.
