@@ -56,9 +56,9 @@ class MultiAgent:
                 (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
                 
                 all_states_for_this_agent = torch.chunk(all_agents_states, 2, dim=1)
-                all_rewards_for_this_agent = [v[actual_agent] for v in all_agents_rewards] #todo correct?
+                all_rewards_for_this_agent = all_agents_rewards[:, actual_agent].reshape(self.sample_batch_size, 1)
                 all_next_states_for_this_agent = torch.chunk(all_agents_next_states, 2, dim=1)
-                all_dones_for_this_agent = [v[actual_agent] for v in all_agents_dones] #todo correct?
+                all_dones_for_this_agent = all_agents_dones[:, actual_agent].reshape(self.sample_batch_size, 1)
 
                 # I got the implementation of updating the actor and critic from
                 # the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
