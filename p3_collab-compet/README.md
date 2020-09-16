@@ -66,8 +66,7 @@ As my implementation receives very low mean scores with different hyperparameter
     I got confident, that a correct amount of noise is an essential point in this project.
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and I debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
-    - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project
-    - I copied OUNoise-class from https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179 to my implementation
+    - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project so I removed it in my implementation
     - I did not manually initialized layer 1 and layer 2 of my Actor and Critic, but this is necessary
     - I did use leaky relu as activation function within my Actor and Critic, but relu is necessary
     - I added the actions to the first layer of my Critic, but adding actions directly to the input is necessary
@@ -81,7 +80,6 @@ As my implementation receives very low mean scores with different hyperparameter
     - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method and merged the results, instead of calling it only for the actual agent of the loop
     - I am not sure if I mentioned here and in my implementation all the bugs I could fix with the help of this repository, maybe there where some more.
 
-    I copied some parts of the provided code into my project and marked the parts with comments.
     Credits to the author (Andrei Bukalov) for this solution.
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet

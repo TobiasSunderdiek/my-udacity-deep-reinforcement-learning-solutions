@@ -43,9 +43,6 @@ class Agent:
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
-        # Udacity Honor Code: After having a look in a solution for this project
-        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-        # I removed decreasing noise by epsilon and used noise from OUNoise-Class from solution here
         action += self.noise()
         return np.clip(action, -1, 1)
 

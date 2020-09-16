@@ -37,6 +37,7 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
+        #todo credits
         all_agents_states = np.concatenate(all_agents_states, axis=0)
         all_agents_actions = np.concatenate(all_agents_actions, axis=0)
         #all_agents_rewards = np.concatenate(all_agents_rewards, axis=0) # zero-dimensional arrays cannot be concatenated
@@ -54,7 +55,7 @@ class MultiAgent:
             # critic
             for actual_agent in range(self.num_agents):
                 (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
-                
+                #todo credits
                 all_states_for_this_agent = torch.chunk(all_agents_states, 2, dim=1)
                 all_rewards_for_this_agent = all_agents_rewards[:, actual_agent].reshape(self.sample_batch_size, 1)
                 all_next_states_for_this_agent = torch.chunk(all_agents_next_states, 2, dim=1)
