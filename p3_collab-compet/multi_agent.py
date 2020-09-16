@@ -76,23 +76,23 @@ class MultiAgent:
                 target_q_values = all_rewards_for_this_agent + (self.gamma * self.agents[actual_agent].critic_target(all_agents_next_states, target_actions).detach() * (1 - all_dones_for_this_agent))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)
 
-                self.agents['actual_agent'].critic_local_optimizer.zero_grad()
+                self.agents[actual_agent].critic_local_optimizer.zero_grad()
                 critic_loss.backward()
                 # I copied this from the course in project 2 Continuous Control 'Benchmark Implementation' where the udacity's benchmark implementation for the previous project
                 # is described and some special settings are explicitly highlighted  
-                torch.nn.utils.clip_grad_norm_(self.agents['actual_agent'].critic_local.parameters(), 1)
-                self.agents['actual_agent'].critic_local_optimizer.step()
-                self.agents['actual_agent'].critic_local.eval()
+                torch.nn.utils.clip_grad_norm_(self.agents[actual_agent].critic_local.parameters(), 1)
+                self.agents[actual_agent].critic_local_optimizer.step()
+                self.agents[actual_agent].critic_local.eval()
 
                 #actor
                 # Udacity Honor Code: As mentioned in README, I called
                 # actor_local not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                actions_local = [self.agents['actual_agent'].actor_local(state_for_this_agent) for state_for_this_agent in all_states_for_this_agent]
+                actions_local = [self.agents[actual_agent].actor_local(state_for_this_agent) for state_for_this_agent in all_states_for_this_agent]
                 actions_local_doubled = torch.cat(actions_local, 1)
 
-                actor_loss = -self.agents['actual_agent'].critic_local(all_agents_states, actions_local_doubled).mean()
+                actor_loss = -self.agents[actual_agent].critic_local(all_agents_states, actions_local_doubled).mean()
                 self.agents[actual_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[actual_agent].actor_local_optimizer.step()
