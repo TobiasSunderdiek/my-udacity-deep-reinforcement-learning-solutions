@@ -17,10 +17,10 @@ class MultiAgent:
         self.agents = [Agent(observation_state_size, action_state_size, hyperparameter) for i in range(num_agents)]
         self.sample_batch_size = hyperparameter['sample_batch_size']
         self.replay_buffer_size = hyperparameter['replay_buffer_size']
-        # Udacity Honor Code: In my first implementation I used a seed of 2, after having a look at a solution for this project
+        # In my first implementation I used a seed of 2, after having a look at a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed it to zero
-        # Also I had to add it here to due to solution mentioned above, to use it within the replay buffer.
+        # Additionally, I had to add it here due to solution mentioned above, to use it within the replay buffer.
         seed = 0
         self.replay_buffer = ReplayBuffer(action_state_size, self.replay_buffer_size, self.sample_batch_size, seed)
         self.gamma = hyperparameter['gamma']
@@ -37,13 +37,14 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
-        # Udacity Honor Code: Code copied
-        # I copied the below transformation of the observations
-        # from here: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L44
+        # I did not transform the observations from the buffer correct,
+        # I got the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         all_agents_states = np.concatenate(all_agents_states, axis=0)
-        all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
         all_agents_actions = np.concatenate(all_agents_actions, axis=0)
-
+        #all_agents_rewards = np.concatenate(all_agents_rewards, axis=0) # zero-dimensional arrays cannot be concatenated
+        all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
+        #all_agents_dones = np.concatenate(all_agents_dones, axis=0)
+        
         self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)        
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
@@ -53,64 +54,57 @@ class MultiAgent:
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.sample_batch_size):
             # critic
-            for num_agent, agent in enumerate(self.agents):
-                # Udacity Honor Code: As mentioned in README, I had a bug in my implementation
-                # add did not get a fresh sample for each agent, but used the same sample for both
-                # Got the correct version from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                experiences = self.replay_buffer.sample()
-                state, action, reward, next_state, done = experiences
-                # Udacity Honor Code: As mentioned in README, I had a bug in the transformation of
-                # the observations out of the replay buffer
-                # I copied the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                x, actions, rewards, next_x, dones = state, action, reward, next_state, done
-                states = torch.chunk(x, 2, dim = 1)
-                next_states = torch.chunk(next_x, 2, dim = 1)
-                rewards = rewards[:,num_agent].reshape(rewards.shape[0],1)
-                dones = dones[:,num_agent].reshape(dones.shape[0],1)
+            for actual_agent in range(self.num_agents):
+                (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
+                # I did not transform the observations from the buffer correct,
+                # I got the correct transformataion from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 
+                all_states_for_this_agent = torch.chunk(all_agents_states, 2, dim=1)
+                all_rewards_for_this_agent = all_agents_rewards[:, actual_agent].reshape(self.sample_batch_size, 1)
+                all_next_states_for_this_agent = torch.chunk(all_agents_next_states, 2, dim=1)
+                all_dones_for_this_agent = all_agents_dones[:, actual_agent].reshape(self.sample_batch_size, 1)
+
                 # I got the implementation of updating the actor and critic from
                 # the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
                 # provided by udacity
-                agent.critic_local.train()
-                local_q_values = agent.critic_local(x, actions)
+                self.agents[actual_agent].critic_local.train()
+                local_q_values = self.agents[actual_agent].critic_local(all_agents_states, all_agents_actions)
 
-                # Udacity Honor Code: As mentioned in README, I called
-                # actor_target not only for the agent within this loop, but for all agents
+                # I called actor_target not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                all_agents_next_actions = [self.agents[num_agent].actor_target(next_state_for_agent) for next_state_for_agent in next_states]
-                target_actions = torch.cat(all_agents_next_actions, dim=1).to(self.device)  
+                this_agents_next_actions = [self.agents[actual_agent].actor_target(next_state_for_agent) for next_state_for_agent in all_next_states_for_this_agent]
+                target_actions = torch.cat(this_agents_next_actions, dim=1).to(self.device)  
                 
-                target_q_values = rewards + (self.gamma * agent.critic_target(next_x, target_actions).detach() * (1 - dones))
+                target_q_values = all_rewards_for_this_agent + (self.gamma * self.agents[actual_agent].critic_target(all_agents_next_states, target_actions).detach() * (1 - all_dones_for_this_agent))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)
 
-                agent.critic_local_optimizer.zero_grad()
+                self.agents[actual_agent].critic_local_optimizer.zero_grad()
                 critic_loss.backward()
                 # I copied this from the course in project 2 Continuous Control 'Benchmark Implementation' where the udacity's benchmark implementation for the previous project
                 # is described and some special settings are explicitly highlighted  
-                torch.nn.utils.clip_grad_norm_(agent.critic_local.parameters(), 1)
-                agent.critic_local_optimizer.step()
-                agent.critic_local.eval()
+                torch.nn.utils.clip_grad_norm_(self.agents[actual_agent].critic_local.parameters(), 1)
+                self.agents[actual_agent].critic_local_optimizer.step()
+                self.agents[actual_agent].critic_local.eval()
 
                 #actor
-                # Udacity Honor Code: As mentioned in README, I called
-                # actor_local not only for the agent within this loop, but for all agents
+                # I called actor_local not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                actions_local = [self.agents[num_agent].actor_local(state) for state in states]
-                actions_local = torch.cat(actions_local, 1)
+                actions_local = [self.agents[actual_agent].actor_local(state_for_this_agent) for state_for_this_agent in all_states_for_this_agent]
+                actions_local_doubled = torch.cat(actions_local, 1)
 
-                actor_loss = -self.agents[num_agent].critic_local(x, actions_local).mean()
-                self.agents[num_agent].actor_local_optimizer.zero_grad()
+                actor_loss = -self.agents[actual_agent].critic_local(all_agents_states, actions_local_doubled).mean()
+                self.agents[actual_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
-                self.agents[num_agent].actor_local_optimizer.step()
-                # Udacity Honor Code: After having a look in a solution for this project
+                self.agents[actual_agent].actor_local_optimizer.step()
+                # After having a look in a solution for this project
                 # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
                 # I moved updating both target networks here. In my first implementation, I did this separately
                 # at different places, the soft_update of the critic's target in this for-loop directly after the critic's part
                 # and before the actor' part. And only the actor's part here after the actor.
-                self.agents[num_agent].soft_update(self.agents[num_agent].critic_target, self.agents[num_agent].critic_local, timestep)
-                self.agents[num_agent].soft_update(self.agents[num_agent].actor_target, self.agents[num_agent].actor_local, timestep)
+                self.agents[actual_agent].soft_update(self.agents[actual_agent].critic_target, self.agents[actual_agent].critic_local, timestep)
+                self.agents[actual_agent].soft_update(self.agents[actual_agent].actor_target, self.agents[actual_agent].actor_local, timestep)
                 
     def save(self):
         data = {}

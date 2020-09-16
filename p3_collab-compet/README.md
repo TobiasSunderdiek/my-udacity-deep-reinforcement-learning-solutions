@@ -54,7 +54,7 @@ As my implementation receives very low mean scores with different hyperparameter
     As I also use separate models for the agents, I got confident that this is an appropriate way of solving this project. As I also tried to fill the replay buffer with values from random play (which in the beginning got more rewards than my implementation) for some episodes, I got confident that this is an appropriate way. I also got confident to collect random values for 1.000 episodes is an appropriate time. I also looked into the provided repository https://github.com/odellus/tennis and compared it to my code. I also tried out the hyperparameters of this solution in my implementation. Credits to the author (Thomas Wood) for this solution.
 
 - https://knowledge.udacity.com/questions/101614
-    In my implementation, I only manually initialised the last layer. In this post, the initialization of all layers is provided. I copied this to my code. Also that random sampling at the beginning alone could take about 1.000 episodes gave me confidence about the total time the training could last in the end.
+    In this post is mentioned, that random sampling at the beginning alone could take about 1.000 episodes gave me confidence about the total time the training could last in the end.
 
 - https://knowledge.udacity.com/questions/303326
     I got confident that the task can be solved within 3.000 episodes.
@@ -65,23 +65,18 @@ As my implementation receives very low mean scores with different hyperparameter
 - https://knowledge.udacity.com/questions/315134
     I got confident, that a correct amount of noise is an essential point in this project.
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and I debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
+    - I played around with different values for sigma and theta for the noise, with this solution I got confident that solving the task with sigma = 0.2 and theta = 0.15 is possible
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
-    - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project
-    - I copied OUNoise-class from https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179 to my implementation
-    - I did not manually initialized layer 1 and layer 2 of my Actor and Critic, but this is necessary
-    - I did use leaky relu as activation function within my Actor and Critic, but relu is necessary
-    - I added the actions to the first layer of my Critic, but adding actions directly to the input is necessary
+    - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project so I removed it in my implementation
     - I did not update the target networks at every steps, but this is necessary
     - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
     - I did not use a new sample for every agent, I used the same one, but a new one is necessary
     - I used a seed of 2, but a seed of 0 is necessary
     - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary
     - I did a hard update from local to target networks weights on initialization, but this was not necessary
-    - I copied all hyperparameters from https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L12 to my implementation
     - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method and merged the results, instead of calling it only for the actual agent of the loop
     - I am not sure if I mentioned here and in my implementation all the bugs I could fix with the help of this repository, maybe there where some more.
 
-    I copied some parts of the provided code into my project and marked the parts with comments.
     Credits to the author (Andrei Bukalov) for this solution.
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet
