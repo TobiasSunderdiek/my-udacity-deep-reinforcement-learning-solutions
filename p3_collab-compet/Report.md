@@ -74,7 +74,7 @@ Controls the theta of the Ohrnstein-Uhlenbeck noise. Actual value 0.15. Udacity 
 
 #### Rewards
 
-The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 3747.
+The agent reaches a mean reward of 0.5 over the last 100 episodes after episode 2004.
 
 ![mean reward plot](tensorboard_reward.png)
 
