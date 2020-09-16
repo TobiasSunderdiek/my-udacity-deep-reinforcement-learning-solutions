@@ -39,9 +39,9 @@ class MultiAgent:
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
         all_agents_states = np.concatenate(all_agents_states, axis=0)
         all_agents_actions = np.concatenate(all_agents_actions, axis=0)
-        all_agents_rewards = np.concatenate(all_agents_rewards, axis=0)
+        #all_agents_rewards = np.concatenate(all_agents_rewards, axis=0) # zero-dimensional arrays cannot be concatenated
         all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
-        all_agents_dones = np.concatenate(all_agents_dones, axis=0)
+        #all_agents_dones = np.concatenate(all_agents_dones, axis=0)
         
         self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)        
 
@@ -52,41 +52,28 @@ class MultiAgent:
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.sample_batch_size):
             # critic
-            for actual_agent in range(self.agents):
+            for actual_agent in range(self.num_agents):
                 (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
                 
-                
+                all_states_for_this_agent = torch.chunk(all_agents_states, 2, dim=1)
+                all_rewards_for_this_agent = [v[actual_agent] for v in all_agents_rewards] #todo correct?
+                all_next_states_for_this_agent = torch.chunk(all_agents_next_states, 2, dim=1)
+                all_dones_for_this_agent = [v[actual_agent] for v in all_agents_dones] #todo correct?
 
-
-
-                # Udacity Honor Code: As mentioned in README, I had a bug in my implementation
-                # add did not get a fresh sample for each agent, but used the same sample for both
-                # Got the correct version from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                experiences = self.replay_buffer.sample()
-                state, action, reward, next_state, done = experiences
-                # Udacity Honor Code: As mentioned in README, I had a bug in the transformation of
-                # the observations out of the replay buffer
-                # I copied the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                x, actions, rewards, next_x, dones = state, action, reward, next_state, done
-                states = torch.chunk(x, 2, dim = 1)
-                next_states = torch.chunk(next_x, 2, dim = 1)
-                rewards = rewards[:,num_agent].reshape(rewards.shape[0],1)
-                dones = dones[:,num_agent].reshape(dones.shape[0],1)
-                
                 # I got the implementation of updating the actor and critic from
                 # the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
                 # provided by udacity
                 self.agents[actual_agent].critic_local.train()
-                local_q_values = self.agents[actual_agent].critic_local(all_agents_states, this_agents_doubled)
+                local_q_values = self.agents[actual_agent].critic_local(all_agents_states, all_agents_actions)
 
                 # Udacity Honor Code: As mentioned in README, I called
                 # actor_target not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                this_agents_next_actions = [self.agents[actual_agent].actor_target(next_state_for_agent) for next_state_for_agent in this_agents_next_states]
+                this_agents_next_actions = [self.agents[actual_agent].actor_target(next_state_for_agent) for next_state_for_agent in all_next_states_for_this_agent]
                 target_actions = torch.cat(this_agents_next_actions, dim=1).to(self.device)  
                 
-                target_q_values = rewards + (self.gamma * self.agents[actual_agent].critic_target(all_agents_next_actions, target_actions).detach() * (1 - dones))
+                target_q_values = all_rewards_for_this_agent + (self.gamma * self.agents[actual_agent].critic_target(all_agents_next_states, target_actions).detach() * (1 - all_dones_for_this_agent))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)
 
                 self.agents['actual_agent'].critic_local_optimizer.zero_grad()
@@ -102,7 +89,7 @@ class MultiAgent:
                 # actor_local not only for the agent within this loop, but for all agents
                 # I got the correct version and the following transformation of the actions
                 # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                actions_local = [self.agents['actual_agent'].actor_local(state_for_this_agent) for state_for_this_agent in this_agents_states]
+                actions_local = [self.agents['actual_agent'].actor_local(state_for_this_agent) for state_for_this_agent in all_states_for_this_agent]
                 actions_local_doubled = torch.cat(actions_local, 1)
 
                 actor_loss = -self.agents['actual_agent'].critic_local(all_agents_states, actions_local_doubled).mean()

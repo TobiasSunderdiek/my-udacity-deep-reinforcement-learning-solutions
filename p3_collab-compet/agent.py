@@ -46,7 +46,7 @@ class Agent:
         # Udacity Honor Code: After having a look in a solution for this project
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I removed decreasing noise by epsilon and used noise from OUNoise-Class from solution here
-        action += self.noise.sample()
+        action += self.noise()
         return np.clip(action, -1, 1)
 
     # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119
