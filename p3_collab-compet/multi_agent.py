@@ -37,13 +37,12 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
-        # Udacity Honor Code: Code copied
-        # I copied the below transformation of the observations
-        # from here: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L44
         all_agents_states = np.concatenate(all_agents_states, axis=0)
-        all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
         all_agents_actions = np.concatenate(all_agents_actions, axis=0)
-
+        all_agents_rewards = np.concatenate(all_agents_rewards, axis=0)
+        all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
+        all_agents_dones = np.concatenate(all_agents_dones, axis=0)
+        
         self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)        
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
@@ -53,7 +52,13 @@ class MultiAgent:
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.sample_batch_size):
             # critic
-            for num_agent, agent in enumerate(self.agents):
+            for actual_agent in range(self.agents):
+                (all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones) = self.replay_buffer.sample()
+
+                
+
+
+
                 # Udacity Honor Code: As mentioned in README, I had a bug in my implementation
                 # add did not get a fresh sample for each agent, but used the same sample for both
                 # Got the correct version from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition

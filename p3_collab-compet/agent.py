@@ -3,34 +3,7 @@ import torch.optim as optimizer
 import numpy as np
 
 from model import Actor, Critic
-# Udacity Honor Code: Code copied
-# I copied the class OUNoise from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/blob/master/p_collaboration_and_competition/MADDPG.py#L179
-import random
-import copy
-OU_THETA = 0.15         # how "strongly" the system reacts to perturbations
-OU_SIGMA = 0.2
-class OUNoise:
-    """Ornstein-Uhlenbeck process."""
-
-    def __init__(self, size, seed, mu=0., theta=OU_THETA, sigma=OU_SIGMA):
-        """Initialize parameters and noise process."""
-        self.mu = mu * np.ones(size)
-        self.theta = theta
-        self.sigma = sigma
-        self.seed = np.random.seed(seed)
-        self.size = size
-        self.reset()  
-        
-    def reset(self):
-        """Reset the internal state (= noise) to mean (mu)."""
-        self.state = copy.copy(self.mu)
-
-    def sample(self):
-        """Update internal state and return it as a noise sample."""
-        x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(self.size)
-        self.state = x + dx
-        return self.state 
+from baselines.ddpg.noise import OrnsteinUhlenbeckActionNoise
 
 class Agent:
     def __init__(self, observation_state_size, action_space_size, hyperparameter):
@@ -57,11 +30,7 @@ class Agent:
         # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
         # I changed removed my manually set weight decay for critic optimizer.
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
-        # Udacity Honor Code: After having a look in a solution for this project
-        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-        # I changed noise to class OUNoise
-        # Also I used the same seed 0 here, got this also from the above mentioned solution to use same seed within OUNoise.
-        self.noise = OUNoise(action_space_size, seed)
+        self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15) #todo if keep, add comment to readme confident about value
         self.update_every = hyperparameter['update_every']
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
