@@ -37,18 +37,9 @@ class MultiAgent:
         return [self.agents[i].select_action(all_agents_states[i], epsilon) for i in range(self.num_agents)]
 
     def add_to_buffer(self, all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones):
-        '''# I did not transform the observations from the buffer correct,
-        # I got the correct transformation from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-        all_agents_states = np.concatenate(all_agents_states, axis=0)
-        all_agents_actions = np.concatenate(all_agents_actions, axis=0)
-        #all_agents_rewards = np.concatenate(all_agents_rewards, axis=0) # zero-dimensional arrays cannot be concatenated
-        all_agents_next_states = np.concatenate(all_agents_next_states, axis=0)
-        #all_agents_dones = np.concatenate(all_agents_dones, axis=0)'''
-        
         self.replay_buffer.add(all_agents_states, all_agents_actions, all_agents_rewards, all_agents_next_states, all_agents_dones)        
 
     def _sample_from_buffer(self):
-        ''' neu
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
         # forgot to(device), after having a look at
         # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L179
@@ -60,30 +51,6 @@ class MultiAgent:
         # dones: convert True/False to 0/1
         dones = torch.FloatTensor(np.where(dones == True, 1, 0)).unsqueeze(-1).to(self.device)
         return states, actions, rewards, next_states, dones
-        '''
-        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.sample_batch_size)
-        # forgot to(device), after having a look at
-        # https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L179
-        # I added it here
-        states = torch.FloatTensor(states).to(self.device)
-        actions = torch.FloatTensor(actions).to(self.device)
-        rewards = torch.FloatTensor(rewards).unsqueeze(-1).to(self.device)
-        next_states = torch.FloatTensor(next_states).to(self.device)
-        # dones: convert True/False to 0/1
-        dones = torch.FloatTensor(np.where(dones == True, 1, 0)).unsqueeze(-1).to(self.device)
-        return states, actions, rewards, next_states, dones
-
-        ''' alt
-        experiences = random.sample(self.memory, k=self.batch_size)
-
-        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
-        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
-        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
-        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
-        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-
-        return (states, actions, rewards, next_states, dones)
-        '''
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L78
     # and adjusted it for the multi agent part
@@ -94,7 +61,6 @@ class MultiAgent:
             # critic
             for actual_agent in range(self.num_agents):
                 all_agents_states_buf, all_agents_actions, all_agents_rewards, all_agents_next_states_buf, all_agents_dones = self._sample_from_buffer()
-                #all_agents_states 128,2,24
                 all_agents_states = torch.reshape(all_agents_states_buf, (self.sample_batch_size, 48))
                 all_agents_actions = torch.reshape(all_agents_actions, (self.sample_batch_size, 4))
                 # todo achtung da ich unten im loop die next actions für alle agents hole
@@ -109,29 +75,12 @@ class MultiAgent:
                 # wieder verweende
                 all_agents_next_states = torch.reshape(all_agents_next_states_buf, (self.sample_batch_size, 48))
 
-                '''
-                # I did not transform the observations from the buffer correct,
-                # I got the correct transformataion from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                
-                    all_states_for_this_agent = torch.chunk(all_agents_states, 2, dim=1)
-                    all_rewards_for_this_agent = all_agents_rewards[:, actual_agent].reshape(self.sample_batch_size, 1)
-                    all_next_states_for_this_agent = torch.chunk(all_agents_next_states, 2, dim=1)
-                    all_dones_for_this_agent = all_agents_dones[:, actual_agent].reshape(self.sample_batch_size, 1)
-                '''
-
                 # I got the implementation of updating the actor and critic from
                 # the MADDPG-Lab implementation of the Physical Deception Problem, which is not public available (Udacity course material)
                 # provided by udacity
                 self.agents[actual_agent].critic_local.train()
                 local_q_values = self.agents[actual_agent].critic_local(all_agents_states, all_agents_actions)
 
-                '''
-                # I called actor_target not only for the agent within this loop, but for all agents
-                # I got the correct version and the following transformation of the actions
-                # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                this_agents_next_actions = [self.agents[actual_agent].actor_target(next_state_for_agent) for next_state_for_agent in all_next_states_for_this_agent]
-                target_actions = torch.cat(this_agents_next_actions, dim=1).to(self.device)
-                '''
                 #todo
                 # ich rufe den actor nicht im loop, sondern mit batch auf
                 #todo hier fehlen die actions vom anderen agent, hier bekommt der critic
@@ -142,7 +91,7 @@ class MultiAgent:
                     all_next_states_for_this_agent = torch.transpose(all_agents_next_states_buf, 0, 1)[a]
                     agent_target_action = self.agents[a].actor_target(all_next_states_for_this_agent)
                     all_agents_next_actions.append(agent_target_action)
-                target_actions = torch.cat(all_agents_next_actions, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
+                target_actions = torch.cat(all_agents_next_actions, 1)
                 
                 target_q_values = all_rewards_for_this_agent + (self.gamma * self.agents[actual_agent].critic_target(all_agents_next_states, target_actions).detach() * (1 - all_dones_for_this_agent))
                 critic_loss = F.mse_loss(local_q_values, target_q_values)

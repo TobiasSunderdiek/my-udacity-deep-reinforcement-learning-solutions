@@ -1,4 +1,4 @@
-This is my solution for the project **Collaboration and Competition**[1]
+This is a second solution for the project **Collaboration and Competition**[1]. Why a second solution? I created this project `p3_collab-compet-aftermath` after graduation of the nanodegree because I want to find out why a former implementation from me did not work. See [9] for more details which parts of my implementation I therefore changed in `p3_collab-compet`. See [this section](#aftermath) in this implementation where I tracked the error.
 
 **Goal**
 > In the project **Collaboration and Competition** the unity **Tennis** [2] environment is given, in which two agents control rackets to play tennis. Every time an agent hits the ball over the net, a reward of +0.1 is given, every time the ball hits the ground or is out of bounds, a reward of -0.01 is given. After each episode, the score of the agent which reached the highest score is added to the total rewards. The goal is to reach mean reward of +0.5 over 100 consecutive episodes.
@@ -62,11 +62,14 @@ As my implementation receives very low mean scores with different hyperparameter
 - https://knowledge.udacity.com/questions/261898
     I got confident that my procedure is basically correct. I got confident that adding the right amount of noise is an very important part in this project.
 
-- https://knowledge.udacity.com/questions/315134
+- https://knowledge.udacity.com/questions/315134 with #aftermath
     I got confident, that a correct amount of noise is an essential point in this project.
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and I debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
     - I played around with different values for sigma and theta for the noise, with this solution I got confident that solving the task with sigma = 0.2 and theta = 0.15 is possible
+    ```diff
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
+    + I found out that my implementation was right
+    ```
     - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project so I removed it in my implementation
     - I did not update the target networks at every steps, but this is necessary
     - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
@@ -94,3 +97,20 @@ As my implementation receives very low mean scores with different hyperparameter
 [7] https://github.com/ray-project/ray/tree/master/python/ray/tune
 
 [8] https://github.com/Unity-Technologies/ml-agents/issues/1167
+
+[9] https://github.com/TobiasSunderdiek/my-udacity-deep-reinforcement-learning-solutions/blob/master/p3_collab-compet/README.md#udacity-honor-code
+
+
+#todo
+---- eigene Buffer-Umwandlung
+- README anpassen
+- alle fremden Punkte in README durchgehen
+- sind hyperparameter die selben?
+- multi_agent neue learn methode vergleichen
+-- immer mit dem selben buffer gearbeitet
+-- critic_target hatte ich kein .detach()
+-- soft_update nach critic direkt und nicht erst am Ende
+-- all_actions_local variable habe ich zu sich selbst zugewiesen, sollte aber möglich sein
+-> sonst ist Umformung kein Problem
+--> ist das Problem das jeder Lauf unterschiedlich ist, mal geht es mal nicht?
+--> oder einfach Geduldsproblem, da am Anfang oft 0.00x WErte und dann wieder 0.0 kommmen?
