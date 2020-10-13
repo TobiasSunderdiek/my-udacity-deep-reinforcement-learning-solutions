@@ -37,7 +37,7 @@ class Agent:
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy() # todo understand why is this directly the max action
         self.actor_local.train()
-        action += self.noise()
+        action += self.noise() * epsilon
         return np.clip(action, -1, 1)
 
     # I got the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L119

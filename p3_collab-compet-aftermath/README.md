@@ -75,7 +75,10 @@ As my implementation receives very low mean scores with different hyperparameter
     - Saving the experiences into and reading experiences out of the buffer was not correct within my implementation
     + I found out that my implementation was right
     ```
+    ```diff
     - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project so I removed it in my implementation
+    + I found out that multiplying noise with epsilon leads to ...
+    ```
     - I did not update the target networks at every steps, but this is necessary
     - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
     - I did not use a new sample for every agent, I used the same one, but a new one is necessary
@@ -127,3 +130,7 @@ As my implementation receives very low mean scores with different hyperparameter
 --> oder einfach Geduldsproblem, da am Anfang oft 0.00x WErte und dann wieder 0.0 kommmen?
 - alte version nochmal laufen lassen, aber Achtung, OUNoise hat andere Params + ander HParams checken vorher
 --> viele schnelle Änderungen und trains schienen Einfluß zu haben
+
+collab_competiton.py
+- habe self.agents.reset_noise früher ausgeführt, anstatt self.agents.reset_noise()
+- und muß es dann nicht auch self.agents[i].reset_noise() sein in multi_agent.py?
