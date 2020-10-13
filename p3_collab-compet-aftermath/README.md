@@ -77,7 +77,7 @@ As my implementation receives very low mean scores with different hyperparameter
     ```
     ```diff
     - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project so I removed it in my implementation
-    + I found out that multiplying noise with epsilon leads to ...
+    + I found out that decreasing noise also works
     ```
     - I did not update the target networks at every steps, but this is necessary
     - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
