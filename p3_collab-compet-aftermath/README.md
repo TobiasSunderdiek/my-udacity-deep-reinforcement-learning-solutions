@@ -1,4 +1,4 @@
-This is a second solution for the project **Collaboration and Competition**[1]. Why a second solution? I created this project `p3_collab-compet-aftermath` after graduation of the nanodegree because I want to find out why a former implementation from me did not work. See [9] for more details which parts of my implementation I therefore changed in `p3_collab-compet`. See [this section](#aftermath) in this implementation where I tracked the error.
+This is a second solution for the project **Collaboration and Competition**[1]. Why a second solution? I created this project `p3_collab-compet-aftermath` after graduation of the nanodegree because I want to find out why a former implementation from me did not work. See [9] for more details which parts of my implementation I therefore changed in `p3_collab-compet`. See [this aftermath section](#aftermath-review) in this implementation where I tracked the error.
 
 **Goal**
 > In the project **Collaboration and Competition** the unity **Tennis** [2] environment is given, in which two agents control rackets to play tennis. Every time an agent hits the ball over the net, a reward of +0.1 is given, every time the ball hits the ground or is out of bounds, a reward of -0.01 is given. After each episode, the score of the agent which reached the highest score is added to the total rewards. The goal is to reach mean reward of +0.5 over 100 consecutive episodes.
@@ -62,7 +62,12 @@ As my implementation receives very low mean scores with different hyperparameter
 - https://knowledge.udacity.com/questions/261898
     I got confident that my procedure is basically correct. I got confident that adding the right amount of noise is an very important part in this project.
 
-- https://knowledge.udacity.com/questions/315134 with #aftermath
+## Aftermath review
+```diff
++ for aftermath review see diff comments below
+```
+
+- https://knowledge.udacity.com/questions/315134
     I got confident, that a correct amount of noise is an essential point in this project.
     I tested the given hyperparameter for learning rate for actor and critic, noise, update intervall target networks, gamma, episodes, buffer size, batch size, tau, weight decay. I also got confidence that my implementation in generell is on the right way, as I looked in the provided pseudo code of the overall process. I cloned the provided repository https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition and I debugged my code by comparing every step of the process. This way, I found different bugs in my implementation:
     - I played around with different values for sigma and theta for the noise, with this solution I got confident that solving the task with sigma = 0.2 and theta = 0.15 is possible
@@ -74,7 +79,10 @@ As my implementation receives very low mean scores with different hyperparameter
     - I did not update the target networks at every steps, but this is necessary
     - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
     - I did not use a new sample for every agent, I used the same one, but a new one is necessary
+    ```diff
     - I used a seed of 2, but a seed of 0 is necessary
+    + I found out that my seed of 2 also works
+    ```
     - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary
     - I did a hard update from local to target networks weights on initialization, but this was not necessary
     - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method and merged the results, instead of calling it only for the actual agent of the loop

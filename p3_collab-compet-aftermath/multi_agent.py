@@ -17,11 +17,6 @@ class MultiAgent:
         self.agents = [Agent(observation_state_size, action_state_size, hyperparameter) for i in range(num_agents)]
         self.sample_batch_size = hyperparameter['sample_batch_size']
         self.replay_buffer_size = hyperparameter['replay_buffer_size']
-        # In my first implementation I used a seed of 2, after having a look at a solution for this project
-        # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-        # I changed it to zero
-        # Additionally, I had to add it here due to solution mentioned above, to use it within the replay buffer.
-        seed = 0
         self.replay_buffer = ReplayBuffer(self.replay_buffer_size)
         self.gamma = hyperparameter['gamma']
         self.hyperparameter = hyperparameter

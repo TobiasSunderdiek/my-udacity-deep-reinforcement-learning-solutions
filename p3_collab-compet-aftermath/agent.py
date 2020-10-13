@@ -15,7 +15,7 @@ class Agent:
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         # forgot to use a seed, after having a look at: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/ddpg_agent.py
         # I added it here
-        seed = 0
+        seed = 2
         num_agents = 2
         self.actor_local = Actor(observation_state_size, action_space_size, hyperparameter, seed).to(self.device)
         self.actor_target = Actor(observation_state_size, action_space_size, hyperparameter, seed).to(self.device)
