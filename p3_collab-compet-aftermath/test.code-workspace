@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../p3_collab-compet"
+		},
+		{
+			"path": "../p2_continuous-control"
 		}
 	],
 	"settings": {
