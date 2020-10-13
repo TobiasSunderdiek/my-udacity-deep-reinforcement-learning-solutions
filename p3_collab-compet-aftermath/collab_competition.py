@@ -77,7 +77,7 @@ if __name__ == '__main__':
                       'tau': 0.01,
                       'actor_learning_rate': 0.0001,
                       'critic_learning_rate': 0.0003,
-                      'update_every': 1,
+                      'update_every': 100,
                       'init_weights_variance': 3*10e-3,
                       'hidden_layer_1': 400,
                       'hidden_layer_2': 300,
