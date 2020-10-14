@@ -76,11 +76,6 @@ class MultiAgent:
                 self.agents[actual_agent].critic_local.train()
                 local_q_values = self.agents[actual_agent].critic_local(all_agents_states, all_agents_actions)
 
-                #todo
-                # ich rufe den actor nicht im loop, sondern mit batch auf
-                #todo hier fehlen die actions vom anderen agent, hier bekommt der critic
-                # nur die Hälfte und daher exception
-                # ich rufe daher wieder wir früher alle agents auf
                 all_agents_next_actions = []
                 for a in range(self.num_agents):
                     all_next_states_for_this_agent = torch.transpose(all_agents_next_states_buf, 0, 1)[a]
@@ -100,27 +95,13 @@ class MultiAgent:
                 self.agents[actual_agent].critic_local.eval()
 
                 #actor
-                # I called actor_local not only for the agent within this loop, but for all agents
-                # I got the correct version and the following transformation of the actions
-                # from a solution for this project here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                
-                #todo ich habe actor_local mit batch aufgerufen, mache ich jetzt auch wieder
-                # aber auch wieder beide agents durchlaufen? weil geht ja in backprop
-                #actions_local = [self.agents[actual_agent].actor_local(state_for_this_agent) for state_for_this_agent in all_states_for_this_agent]
-                #actions_local_doubled = torch.cat(actions_local, 1)
                 actions_local = []
                 for b in range(self.num_agents):
-                    #todo hier habe ich all-agents-states falsch behandelt, war aber nur in dieser Version
-                    # da im original ich vorher nicht die variablen zugeweisen habe oben
-                    # daher hier die original version aus dem buffer all_agents_states_buf
-                    state_for_this_agent = torch.transpose(all_agents_states_buf, 0, 1)[b] # all_agents_states (ohne buf): 128,48 #batch 128, 48 ist obs
-                    actions_local.append(self.agents[b].actor_local(state_for_this_agent)) # state_for_this_agent: 128
-                
-                #todo unnötige zuweisung
-                actions_local_doubled = torch.cat(actions_local, 1) #128,2 und 128,2 (jeweils 1 Agent) -> 128,4
+                    state_for_this_agent = torch.transpose(all_agents_states_buf, 0, 1)[b]
+                    actions_local.append(self.agents[b].actor_local(state_for_this_agent))
+                local_actions = torch.cat(actions_local, 1)
 
-
-                actor_loss = -self.agents[actual_agent].critic_local(all_agents_states, actions_local_doubled).mean()
+                actor_loss = -self.agents[actual_agent].critic_local(all_agents_states, local_actions).mean()
                 self.agents[actual_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[actual_agent].actor_local_optimizer.step()

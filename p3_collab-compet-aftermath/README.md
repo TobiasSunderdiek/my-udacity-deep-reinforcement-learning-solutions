@@ -94,7 +94,10 @@ As my implementation receives very low mean scores with different hyperparameter
     + I found out that setting weight_decay=0.0001 was one of the main issues in my implementation. With this setting the mean score stayed very low (~ 0.00x for over 1.5k episodes till abort). The default is weight_decay=0.
     ```
     - I did a hard update from local to target networks weights on initialization, but this was not necessary
+    ```diff
     - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method and merged the results, instead of calling it only for the actual agent of the loop
+    + I found out that my implementation of looping over all agents also works
+    ```
     - I am not sure if I mentioned here and in my implementation all the bugs I could fix with the help of this repository, maybe there where some more.
 
     Credits to the author (Andrei Bukalov) for this solution.
