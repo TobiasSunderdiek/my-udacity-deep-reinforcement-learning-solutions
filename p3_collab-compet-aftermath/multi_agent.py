@@ -93,6 +93,7 @@ class MultiAgent:
                 torch.nn.utils.clip_grad_norm_(self.agents[actual_agent].critic_local.parameters(), 1)
                 self.agents[actual_agent].critic_local_optimizer.step()
                 self.agents[actual_agent].critic_local.eval()
+                self.agents[actual_agent].soft_update(self.agents[actual_agent].critic_target, self.agents[actual_agent].critic_local, timestep)
 
                 #actor
                 actions_local = []
@@ -105,12 +106,6 @@ class MultiAgent:
                 self.agents[actual_agent].actor_local_optimizer.zero_grad()
                 actor_loss.backward()
                 self.agents[actual_agent].actor_local_optimizer.step()
-                # After having a look in a solution for this project
-                # here: https://github.com/and-buk/Udacity-DRLND/tree/master/p_collaboration_and_competition
-                # I moved updating both target networks here. In my first implementation, I did this separately
-                # at different places, the soft_update of the critic's target in this for-loop directly after the critic's part
-                # and before the actor' part. And only the actor's part here after the actor.
-                self.agents[actual_agent].soft_update(self.agents[actual_agent].critic_target, self.agents[actual_agent].critic_local, timestep)
                 self.agents[actual_agent].soft_update(self.agents[actual_agent].actor_target, self.agents[actual_agent].actor_local, timestep)
                 
     def save(self):
