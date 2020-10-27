@@ -53,9 +53,9 @@ class MultiAgent:
         # only learn if enough data available
         # I copied this from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L60
         if(len(self.replay_buffer) >= self.sample_batch_size):
+            all_agents_states_buf, all_agents_actions, all_agents_rewards, all_agents_next_states_buf, all_agents_dones = self._sample_from_buffer()
             # critic
             for actual_agent in range(self.num_agents):
-                all_agents_states_buf, all_agents_actions, all_agents_rewards, all_agents_next_states_buf, all_agents_dones = self._sample_from_buffer()
                 all_agents_states = torch.reshape(all_agents_states_buf, (self.sample_batch_size, 48))
                 all_agents_actions = torch.reshape(all_agents_actions, (self.sample_batch_size, 4))
                 # todo achtung da ich unten im loop die next actions für alle agents hole

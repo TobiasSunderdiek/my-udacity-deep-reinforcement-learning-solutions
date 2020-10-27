@@ -87,7 +87,10 @@ As my implementation receives very low mean scores with different hyperparameter
     - I also did update the target networks at different locations, but it is necessary to update them both at end of every agent's update loop
     + I found out that updating the target networks at different locations also works, but reaching mean score of 0.5 takes a lot more episodes.
     ```
+    ```diff
     - I did not use a new sample for every agent, I used the same one, but a new one is necessary
+    + I found out that my implementation of using one sample for all agents within one episode also works.
+    ```
     ```diff
     - I used a seed of 2, but a seed of 0 is necessary
     + I found out that my seed of 2 also works
