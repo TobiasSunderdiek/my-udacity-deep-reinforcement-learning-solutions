@@ -26,6 +26,8 @@ class Agent:
         self.critic_local_optimizer = optimizer.Adam(self.critic_local.parameters(),  hyperparameter['critic_learning_rate'])
         self.noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_space_size), sigma=0.2, theta=0.15)
         self.update_every = hyperparameter['update_every']
+        self.hard_update(self.critic_target, self.critic_local)
+        self.hard_update(self.actor_target, self.actor_local)
 
     # I copied the content of this method from here: https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/ddpg_agent.py#L64
     def select_action(self, state, epsilon):
@@ -49,3 +51,9 @@ class Agent:
     
     def reset_noise(self):
         self.noise.reset()
+
+    # I forgot to hard update, got this from the MADDPG-Lab implementation of the Physical Deception Problem,
+    # which is not public available (Udacity course material) provided by Udacity
+    def hard_update(self, target_network, local_network):
+        for target_param, local_param in zip(target_network.parameters(), local_network.parameters()):
+            target_param.data.copy_(local_param.data)

@@ -89,7 +89,7 @@ As my implementation receives very low mean scores with different hyperparameter
     ```
     ```diff
     - I did not use a new sample for every agent, I used the same one, but a new one is necessary
-    + I found out that my implementation of using one sample for all agents within one episode also works.
+    + I found out that my implementation of using one sample for all agents within one episode also works. todo or does it stick at 0.04?
     ```
     ```diff
     - I used a seed of 2, but a seed of 0 is necessary
@@ -99,7 +99,10 @@ As my implementation receives very low mean scores with different hyperparameter
     - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary
     + I found out that setting weight_decay=0.0001 was one of the main issues in my implementation. With this setting the mean score stayed very low (~ 0.00x for over 1.5k episodes till abort). The default is weight_decay=0.
     ```
+    ```diff
     - I did a hard update from local to target networks weights on initialization, but this was not necessary
+    + ... sticks at 0.0? but was not necessary, I added this after training did not work at first time
+    ```
     ```diff
     - I did call `actor_local` and `actor_target` for getting the actions in a wrong way: Within the for-loop for each agent, I again looped over all agents and called the method and merged the results, instead of calling it only for the actual agent of the loop
     + I found out that my implementation of looping over all agents also works
