@@ -58,16 +58,8 @@ class MultiAgent:
             for actual_agent in range(self.num_agents):
                 all_agents_states = torch.reshape(all_agents_states_buf, (self.sample_batch_size, 48))
                 all_agents_actions = torch.reshape(all_agents_actions, (self.sample_batch_size, 4))
-                # todo achtung da ich unten im loop die next actions für alle agents hole
-                # habe ich es hier wieder auskommentier
-                # erheblichen einfluß, siehe kommentar for all_agents_next_states = ...
-                #all_next_states_for_this_agent = torch.transpose(all_agents_next_states, 0, 1)[actual_agent]#[128, 2, 24] -> [2, 128, 24]
                 all_rewards_for_this_agent = torch.transpose(all_agents_rewards, 0, 1)[actual_agent] #(128,2,1) -> (2,128,1)
                 all_dones_for_this_agent = torch.transpose(all_agents_dones, 0, 1)[actual_agent] #128,2,1 -> 2,128,1
-                #all_states_for_this_agent = torch.transpose(all_agents_states, 0, 1)[actual_agent]
-                #todo achtung reihenfolge wichtige da all_next_states_for_this_agent auf altem Wert arbeitet
-                # das könnte das Problem gewesen sein, da ich unten im loop all_next_states_for_this_agent
-                # wieder verweende
                 all_agents_next_states = torch.reshape(all_agents_next_states_buf, (self.sample_batch_size, 48))
 
                 # I got the implementation of updating the actor and critic from

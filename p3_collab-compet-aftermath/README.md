@@ -64,7 +64,7 @@ As my implementation receives very low mean scores with different hyperparameter
 
 ## Aftermath review
 ```diff
-+ for aftermath review see diff comments below
++ For detailed aftermath review see diff comments below
 ```
 
 - https://knowledge.udacity.com/questions/315134
@@ -77,7 +77,7 @@ As my implementation receives very low mean scores with different hyperparameter
     ```
     ```diff
     - I decreased noise over time within my implementation, but to not decrease noise is necessary in this project so I removed it in my implementation
-    + I found out that decreasing noise also works
+    + I found out that decreasing noise also works. I had a bug in my implemetation, where I did not call the methods correctly: I called self.agents.reset_noise and self.agents[i].reset_noise instead of self.agents.reset_noise() and self.agents[i].reset_noise(). This was the first main issue within my implementation.
     ```
     ```diff
     - I did not update the target networks at every steps, but this is necessary
@@ -97,7 +97,7 @@ As my implementation receives very low mean scores with different hyperparameter
     ```
     ```diff
     - I used weight_decay=0.0001 for the critic, but not manually set weight_decay is necessary
-    + I found out that setting weight_decay=0.0001 was one of the main issues in my implementation. With this setting the mean score stayed very low (~ 0.00x for over 1.5k episodes till abort). The default is weight_decay=0.
+    + I found out that setting weight_decay=0.0001 was the second main issue in my implementation. With this setting the mean score stayed very low (~ 0.00x for over 1.5k episodes till abort). The default is weight_decay=0.
     ```
     ```diff
     - I did a hard update from local to target networks weights on initialization, but this was not necessary
@@ -110,6 +110,9 @@ As my implementation receives very low mean scores with different hyperparameter
     - I am not sure if I mentioned here and in my implementation all the bugs I could fix with the help of this repository, maybe there where some more.
 
     Credits to the author (Andrei Bukalov) for this solution.
+```diff
++ After spotting the mentioned bugs witin my former implemetation, I reached mean score of 0.5139000077918172 over last 100 episodes after episode 6538.
+```
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet
 
@@ -128,24 +131,3 @@ As my implementation receives very low mean scores with different hyperparameter
 [8] https://github.com/Unity-Technologies/ml-agents/issues/1167
 
 [9] https://github.com/TobiasSunderdiek/my-udacity-deep-reinforcement-learning-solutions/blob/master/p3_collab-compet/README.md#udacity-honor-code
-
-
-#todo
----- eigene Buffer-Umwandlung
-- README anpassen
-- alle fremden Punkte in README durchgehen
-- sind hyperparameter die selben?
-- multi_agent neue learn methode vergleichen
--- immer mit dem selben buffer gearbeitet
--- critic_target hatte ich kein .detach()
--- soft_update nach critic direkt und nicht erst am Ende
--- all_actions_local variable habe ich zu sich selbst zugewiesen, sollte aber möglich sein
--> sonst ist Umformung kein Problem
---> ist das Problem das jeder Lauf unterschiedlich ist, mal geht es mal nicht?
---> oder einfach Geduldsproblem, da am Anfang oft 0.00x WErte und dann wieder 0.0 kommmen?
-- alte version nochmal laufen lassen, aber Achtung, OUNoise hat andere Params + ander HParams checken vorher
---> viele schnelle Änderungen und trains schienen Einfluß zu haben
-
-collab_competiton.py
-- habe self.agents.reset_noise früher ausgeführt, anstatt self.agents.reset_noise()
-- und muß es dann nicht auch self.agents[i].reset_noise() sein in multi_agent.py?
