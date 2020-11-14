@@ -111,7 +111,7 @@ As my implementation receives very low mean scores with different hyperparameter
 
     Credits to the author (Andrei Bukalov) for this solution.
 ```diff
-+ After spotting the mentioned bugs witin my former implemetation, I reached mean score of 0.5139000077918172 over last 100 episodes after episode 6538.
++ Aftermath result: In this aftermath project I compared my former implementation for project 3, which did not work, to my solution in folder p3_collab-compet. This way, I found out that not all of the points I thought they were bugs are bugs, and I spotted the real bugs in my former implemenation: By not using a weight decay of 0.0001 and calling the reset_noise()-methods correctly, I could reach a mean score of 0.5 in my former implementation and also in this aftermath project.
 ```
 
 [1] https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet
